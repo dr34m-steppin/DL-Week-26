@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: relearnai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LLM_PROVIDER
+        value: openai
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: ENABLE_ONLINE_CONTEXT
+        value: "1"
+      - key: ONLINE_CONTEXT_MAX_TOPICS
+        value: "4"
+      - key: ONLINE_CONTEXT_CHARS_PER_TOPIC
+        value: "550"
+      - key: OPENAI_API_KEY
+        sync: false
