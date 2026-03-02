@@ -2,6 +2,7 @@ import os
 import re
 import sqlite3
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Any, Iterable, Optional
 
 try:
@@ -533,7 +534,14 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 def _database_url() -> str:
-    return os.getenv("DATABASE_URL", "").strip()
+    for key in ("DATABASE_URL", "SUPABASE_DATABASE_URL", "POSTGRES_URL"):
+        value = os.getenv(key, "").strip()
+        if value:
+            if "sslmode=" not in value.lower():
+                sep = "&" if "?" in value else "?"
+                value = f"{value}{sep}sslmode=require"
+            return value
+    return ""
 
 
 def _using_postgres() -> bool:
@@ -544,7 +552,12 @@ def _using_postgres() -> bool:
 def _sqlite_db_path() -> Path:
     db_path_env = os.getenv("DB_PATH", "").strip()
     if db_path_env:
-        return Path(db_path_env)
+        candidate = Path(db_path_env)
+        try:
+            candidate.parent.mkdir(parents=True, exist_ok=True)
+            return candidate
+        except Exception:
+            pass
 
     render_disk_path = Path("/var/data")
     if render_disk_path.exists() and os.access(render_disk_path, os.W_OK):
@@ -656,7 +669,11 @@ def get_connection():
     if _using_postgres():
         if psycopg2 is None:
             raise RuntimeError("DATABASE_URL is set but psycopg2 is not installed. Add psycopg2-binary to requirements.")
-        raw_conn = psycopg2.connect(_database_url())
+        db_url = _database_url()
+        parsed = urlparse(db_url)
+        if not parsed.scheme.startswith("postgres"):
+            raise RuntimeError("DATABASE_URL must start with postgresql:// or postgres://")
+        raw_conn = psycopg2.connect(db_url, connect_timeout=12)
         raw_conn.autocommit = False
         return _PostgresConnectionCompat(raw_conn)
 
