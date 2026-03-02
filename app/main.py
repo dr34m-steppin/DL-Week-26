@@ -1153,7 +1153,11 @@ def _learning_state(conn, user_id: int, course_id: int) -> Dict[str, Any]:
 
 @app.on_event("startup")
 def on_startup() -> None:
-    init_db()
+    try:
+        init_db()
+    except Exception as exc:
+        print(f"[startup] init_db failed: {exc}", flush=True)
+        raise
 
 
 @app.get("/", response_class=HTMLResponse)

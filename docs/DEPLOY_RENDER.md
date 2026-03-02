@@ -21,6 +21,7 @@ Add these in Render -> Environment:
 
 - `SECRET_KEY` = long random string
 - `DATABASE_URL` = your Supabase Postgres URL
+- `DB_FALLBACK_TO_SQLITE` = `1` (optional fail-safe so app still boots if DB URL is broken)
 - `LLM_PROVIDER` = `openai`
 - `OPENAI_API_KEY` = your real key
 - `OPENAI_MODEL` = `gpt-4o-mini`
@@ -37,6 +38,7 @@ Add these in Render -> Environment:
 - App uses `DATABASE_URL` when provided.
 - All users, courses, leaderboard, quiz history are stored in Supabase Postgres.
 - Redeploying Render no longer resets data.
+- If Supabase is temporarily unreachable, app can fallback to SQLite when `DB_FALLBACK_TO_SQLITE=1`.
 
 ## 6) Safety Checklist
 - Keep login enabled.

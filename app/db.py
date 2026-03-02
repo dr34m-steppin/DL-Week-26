@@ -549,6 +549,11 @@ def _using_postgres() -> bool:
     return value.startswith("postgres://") or value.startswith("postgresql://")
 
 
+def _allow_sqlite_fallback() -> bool:
+    value = os.getenv("DB_FALLBACK_TO_SQLITE", "1").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
 def _sqlite_db_path() -> Path:
     db_path_env = os.getenv("DB_PATH", "").strip()
     if db_path_env:
@@ -665,18 +670,11 @@ class _PostgresConnectionCompat:
         self._raw.close()
 
 
-def get_connection():
-    if _using_postgres():
-        if psycopg2 is None:
-            raise RuntimeError("DATABASE_URL is set but psycopg2 is not installed. Add psycopg2-binary to requirements.")
-        db_url = _database_url()
-        parsed = urlparse(db_url)
-        if not parsed.scheme.startswith("postgres"):
-            raise RuntimeError("DATABASE_URL must start with postgresql:// or postgres://")
-        raw_conn = psycopg2.connect(db_url, connect_timeout=12)
-        raw_conn.autocommit = False
-        return _PostgresConnectionCompat(raw_conn)
+def _is_postgres_connection(conn: Any) -> bool:
+    return isinstance(conn, _PostgresConnectionCompat)
 
+
+def _open_sqlite_connection() -> sqlite3.Connection:
     db_path = _sqlite_db_path()
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path)
@@ -685,8 +683,29 @@ def get_connection():
     return conn
 
 
-def _ensure_column(conn, table: str, column: str, definition: str) -> None:
+def get_connection():
     if _using_postgres():
+        if psycopg2 is None:
+            raise RuntimeError("DATABASE_URL is set but psycopg2 is not installed. Add psycopg2-binary to requirements.")
+        db_url = _database_url()
+        parsed = urlparse(db_url)
+        if not parsed.scheme.startswith("postgres"):
+            raise RuntimeError("DATABASE_URL must start with postgresql:// or postgres://")
+        try:
+            raw_conn = psycopg2.connect(db_url, connect_timeout=12)
+            raw_conn.autocommit = False
+            return _PostgresConnectionCompat(raw_conn)
+        except Exception as exc:
+            if not _allow_sqlite_fallback():
+                raise
+            print(f"[db] Postgres connection failed, falling back to SQLite: {exc}", flush=True)
+            return _open_sqlite_connection()
+
+    return _open_sqlite_connection()
+
+
+def _ensure_column(conn, table: str, column: str, definition: str) -> None:
+    if _is_postgres_connection(conn):
         row = conn.execute(
             """
             SELECT 1
@@ -717,7 +736,7 @@ def _run_postgres_schema(conn) -> None:
 def init_db() -> None:
     conn = get_connection()
     try:
-        if _using_postgres():
+        if _is_postgres_connection(conn):
             _run_postgres_schema(conn)
         else:
             conn.executescript(SQLITE_SCHEMA_SQL)
