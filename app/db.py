@@ -1,9 +1,10 @@
 import sqlite3
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
-DB_PATH = DATA_DIR / "relearnai.db"
+DEFAULT_DB_FILE = "relearnai.db"
 
 
 SCHEMA_SQL = """
@@ -277,9 +278,20 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 def get_connection() -> sqlite3.Connection:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    db_path_env = os.getenv("DB_PATH", "").strip()
+    if db_path_env:
+        db_path = Path(db_path_env)
+    else:
+        render_disk_path = Path("/var/data")
+        if render_disk_path.exists() and os.access(render_disk_path, os.W_OK):
+            db_path = render_disk_path / DEFAULT_DB_FILE
+        else:
+            db_path = DATA_DIR / DEFAULT_DB_FILE
+
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
 
