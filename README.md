@@ -156,19 +156,6 @@ Responsible AI considerations are baked in:
 
 ---
 
-## 🎥 Demo Suggestions
-Record a short walkthrough showing:
-1. Uploading PDF & dataset.
-2. Asking a question and seeing citations.
-3. Generating and completing a quiz with auto‑grade.
-4. Mastery update and next-action recommendation.
-5. Switching to professor view and making an override.
-
-Highlight the audit logs and SnapScore leaderboard to emphasize trust and
-reputation.
-
----
-
 ## ⚠️ Notes & Tips
 
 - No `OPENAI_API_KEY`? Fall back to template generation—flow still works.
