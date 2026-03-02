@@ -534,7 +534,14 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 def _database_url() -> str:
-    for key in ("DATABASE_URL", "SUPABASE_DATABASE_URL", "POSTGRES_URL"):
+    for key in (
+        "DATABASE_URL",
+        "SUPABASE_DATABASE_URL",
+        "POSTGRES_URL",
+        "RENDER_DATABASE_URL",
+        "RENDER_EXTERNAL_DATABASE_URL",
+        "POSTGRESQL_URL",
+    ):
         value = os.getenv(key, "").strip()
         if value:
             if "sslmode=" not in value.lower():
@@ -567,7 +574,15 @@ def _sqlite_db_path() -> Path:
     render_disk_path = Path("/var/data")
     if render_disk_path.exists() and os.access(render_disk_path, os.W_OK):
         return render_disk_path / DEFAULT_DB_FILE
-    return DATA_DIR / DEFAULT_DB_FILE
+
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        if os.access(DATA_DIR, os.W_OK):
+            return DATA_DIR / DEFAULT_DB_FILE
+    except Exception:
+        pass
+
+    return Path("/tmp") / DEFAULT_DB_FILE
 
 
 def _sqlite_to_postgres_query(query: str) -> str:
@@ -743,6 +758,8 @@ def _run_postgres_schema(conn) -> None:
 def init_db() -> None:
     conn = get_connection()
     try:
+        backend = "postgres" if _is_postgres_connection(conn) else "sqlite"
+        print(f"[db] init backend={backend}", flush=True)
         if _is_postgres_connection(conn):
             _run_postgres_schema(conn)
         else:

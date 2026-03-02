@@ -2,11 +2,17 @@
 
 This deploy keeps your OpenAI key private. Do not commit `.env` or any real keys to GitHub.
 
-## 1) Create Supabase Postgres (free tier)
+## 1) Create Postgres Database
+Preferred for your case: Render Free PostgreSQL trial (1GB, trial period).
+
+Option A (Render Postgres):
+1. In Render dashboard, create a PostgreSQL database.
+2. Copy its internal/external connection string URL.
+
+Option B (Supabase Postgres):
 1. Create a project in Supabase.
 2. Open **Project Settings -> Database**.
-3. Copy the connection string (Transaction mode), format:
-   `postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?sslmode=require`
+3. Copy connection string (URI), usually transaction pooler.
 
 ## 2) Create Web Service
 1. Go to Render dashboard.
@@ -20,7 +26,7 @@ This deploy keeps your OpenAI key private. Do not commit `.env` or any real keys
 Add these in Render -> Environment:
 
 - `SECRET_KEY` = long random string
-- `DATABASE_URL` = your Supabase Postgres URL
+- `DATABASE_URL` = your Postgres URL (Render or Supabase)
 - `DB_FALLBACK_TO_SQLITE` = `1` (optional fail-safe so app still boots if DB URL is broken)
 - `LLM_PROVIDER` = `openai`
 - `OPENAI_API_KEY` = your real key
@@ -39,6 +45,8 @@ Add these in Render -> Environment:
 - All users, courses, leaderboard, quiz history are stored in Supabase Postgres.
 - Redeploying Render no longer resets data.
 - If Supabase is temporarily unreachable, app can fallback to SQLite when `DB_FALLBACK_TO_SQLITE=1`.
+
+If using Render Postgres, replace \"Supabase\" above with \"Render Postgres\"; behavior is the same.
 
 ## 6) Safety Checklist
 - Keep login enabled.
