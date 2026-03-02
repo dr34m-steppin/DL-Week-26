@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Course | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ course.title }}</h1>
+  <p>{{ course.description or '' }}</p>
+  <div class="inline-actions">
+    <a class="button-link" href="/student/course/{{ course.id }}/quiz">Start Diagnostic Quiz</a>
+    <a class="button-link" href="/student/course/{{ course.id }}/dashboard">Open Dashboard</a>
+    <a class="button-link" href="/student/course/{{ course.id }}/tutor">Open Tutor Chat</a>
+  </div>
+  <p><strong>SnapScore:</strong> {{ snapscore }}</p>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Course Document</h2>
+    {% if document %}
+      <p class="muted">Source: {{ document.filename }}</p>
+      <pre class="doc-preview">{{ preview }}</pre>
+    {% else %}
+      <p class="warning">Professor has not uploaded a document yet.</p>
+    {% endif %}
+  </article>
+
+  <article class="card">
+    <h2>Current Gap Snapshot</h2>
+    {% for state in states %}
+      <p><strong>{{ state.topic }}</strong> • Mastery {{ (state.mastery_score * 100)|round(1) }}% • Attempts {{ state.attempts }}</p>
+    {% else %}
+      <p class="muted">No attempts yet. Start diagnostic quiz.</p>
+    {% endfor %}
+
+    <h3>Active Risk Notes</h3>
+    {% for flag in open_flags %}
+      <p>{{ flag.topic }}: {{ flag.risk_level }} ({{ flag.status }})</p>
+    {% else %}
+      <p class="muted">No active risk flags.</p>
+    {% endfor %}
+  </article>
+</section>
+{% endblock %}

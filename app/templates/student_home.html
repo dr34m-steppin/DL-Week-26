@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Student | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Student Portal</h1>
+  <p>Select a course and start the adaptive loop: diagnose → quiz → evaluate → update.</p>
+  <div class="inline-actions">
+    <a class="button-link" href="/explore">Explore</a>
+    <a class="button-link" href="/journeys">Learning Journey</a>
+    <a class="button-link" href="/contributions">Projects & Publications</a>
+    <a class="button-link" href="/leaderboard">Leaderboard</a>
+    <a class="button-link" href="/notifications">Notifications</a>
+  </div>
+</section>
+
+<section class="grid-2">
+  {% for course in courses %}
+  <article class="card">
+    <h3>{{ course.title }}</h3>
+    <p>{{ course.description or '' }}</p>
+    <p class="muted">Professor: {{ course.professor_name }}</p>
+    {% if course.enrolled %}
+      <a class="button-link" href="/student/course/{{ course.id }}/dashboard">Open Dashboard</a>
+    {% else %}
+      <form method="post" action="/student/enroll/{{ course.id }}">
+        <button type="submit">Enroll + Open Dashboard</button>
+      </form>
+    {% endif %}
+  </article>
+  {% else %}
+  <article class="card">
+    <p>No courses published yet.</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

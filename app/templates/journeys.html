@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Learning Journeys | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>AI Learning Journey Builder</h1>
+  <p class="muted">Convert project ideas, research concepts, or career goals into modules, milestones, and verification checkpoints.</p>
+  <form method="post" action="/journeys/create" class="form-grid two-col">
+    <div>
+      <label>Journey Title</label>
+      <input type="text" name="title" placeholder="AI Medical Imaging Mastery" required />
+    </div>
+    <div>
+      <label>Domain</label>
+      <select name="domain" required>
+        {% for d in domains %}
+        <option value="{{ d.slug }}">{{ d.display_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Learner Level</label>
+      <select name="learner_level">
+        <option value="beginner">Beginner</option>
+        <option value="intermediate" selected>Intermediate</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
+    <div>
+      <label>Visibility</label>
+      <select name="visibility">
+        <option value="private">Private</option>
+        <option value="public">Public</option>
+      </select>
+    </div>
+    <div class="block">
+      <label>Goal / Problem Statement</label>
+      <textarea name="goal_text" placeholder="Build AI-based medical imaging system with verified contribution pathway." required></textarea>
+    </div>
+    <button type="submit">Generate Learning Journey</button>
+  </form>
+</section>
+
+<section class="grid-2">
+  {% for journey in journeys %}
+  <article class="card">
+    <h3>{{ journey.title }}</h3>
+    <p class="muted">{{ journey.domain }} • {{ journey.learner_level }} • {{ journey.visibility }} • {{ journey.owner_name }}</p>
+    <p><strong>Source Goal:</strong> {{ journey.source_text }}</p>
+    {% if journey.journey.modules %}
+      {% for module in journey.journey.modules %}
+      <div class="metric-row">
+        <p><strong>{{ module['phase'] }}</strong></p>
+        <p class="muted tiny">{{ module['items'] | join(', ') }}</p>
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    {% set final_project = journey.journey.get('final_project') %}
+    {% if final_project %}
+    <h3>AI Final Project</h3>
+    <p><strong>{{ final_project.get('title') }}</strong></p>
+    <p class="muted tiny">{{ final_project.get('objective') }}</p>
+    <p class="muted tiny">Deliverables: {{ final_project.get('deliverables', []) | join(', ') }}</p>
+    <form method="post" action="/journeys/{{ journey.id }}/final-project" class="mini-form">
+      <label>Visibility</label>
+      <select name="visibility">
+        <option value="private">Private</option>
+        <option value="public">Public</option>
+      </select>
+      <label><input type="checkbox" name="is_open_source" value="1" /> Open source</label>
+      <button type="submit">Create Final Project Draft</button>
+    </form>
+
+    <form method="post" action="/journeys/{{ journey.id }}/report-upload" enctype="multipart/form-data" class="mini-form">
+      <label>Final Report Title</label>
+      <input type="text" name="report_title" value="{{ final_project.get('title') }} Report" />
+      <label>Report Summary</label>
+      <textarea name="summary" placeholder="What was built, validated, and contributed?"></textarea>
+      <label>Upload Report File (PDF/TXT/MD)</label>
+      <input type="file" name="report_file" accept=".pdf,.txt,.md" required />
+      <label>Visibility</label>
+      <select name="visibility">
+        <option value="private">Private</option>
+        <option value="public">Public</option>
+      </select>
+      <label><input type="checkbox" name="is_open_source" value="1" /> Open source</label>
+      <button type="submit">Upload Final Project Report</button>
+    </form>
+    {% endif %}
+
+    <h3>Milestone Checkpoints</h3>
+    {% for cp in journey.checkpoints %}
+    <form method="post" action="/journeys/{{ journey.id }}/checkpoint/{{ cp.id }}" class="mini-form">
+      <p><strong>{{ cp.milestone_title }}</strong></p>
+      <select name="status">
+        <option value="PENDING" {% if cp.status == 'PENDING' %}selected{% endif %}>Pending</option>
+        <option value="IN_PROGRESS" {% if cp.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+        <option value="DONE" {% if cp.status == 'DONE' %}selected{% endif %}>Done</option>
+      </select>
+      <textarea name="evidence_text" placeholder="Artifact link, notes, benchmark result">{{ cp.evidence_text }}</textarea>
+      <button type="submit">Update Checkpoint</button>
+    </form>
+    {% else %}
+    <p class="muted">No checkpoints generated yet.</p>
+    {% endfor %}
+  </article>
+  {% else %}
+  <article class="card">
+    <p>No journeys yet. Generate your first journey above.</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

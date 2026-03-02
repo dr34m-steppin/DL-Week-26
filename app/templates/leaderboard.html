@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Global Expertise Leaderboard</h1>
+  <p class="muted">SnapScore combines mastery, quiz performance, project completion, peer validation, originality, and impact.</p>
+  <form method="get" action="/leaderboard" class="form-grid two-col">
+    <div>
+      <label>Domain</label>
+      <select name="domain">
+        <option value="">All Domains</option>
+        {% for d in domains %}
+        <option value="{{ d.slug }}" {% if selected_domain == d.slug %}selected{% endif %}>{{ d.display_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit">Apply Filter</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Rankings</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Primary Domain</th>
+        {% if selected_domain %}<th>Domain Affinity</th>{% endif %}
+        <th>SnapScore</th>
+        <th>Mastery</th>
+        <th>Quiz</th>
+        <th>Project Completion</th>
+        <th>Peer Validation</th>
+        <th>Originality</th>
+        <th>Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>#{{ row.rank }}</td>
+        <td>{{ row.name }}</td>
+        <td>{{ row.role }}</td>
+        <td>{{ row.primary_domain }}</td>
+        {% if selected_domain %}<td>{{ row.selected_domain_score }}</td>{% endif %}
+        <td><strong>{{ row.snapscore }}</strong></td>
+        <td>{{ row.components.mastery }}</td>
+        <td>{{ row.components.quiz_accuracy }}</td>
+        <td>{{ row.components.project_completion }}</td>
+        <td>{{ row.components.peer_validation }}</td>
+        <td>{{ row.components.originality }}</td>
+        <td>{{ row.components.impact }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="{% if selected_domain %}12{% else %}11{% endif %}">No ranking data available yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

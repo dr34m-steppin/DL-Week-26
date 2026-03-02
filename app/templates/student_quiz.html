@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Quiz | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card student-shell-head fade-in">
+  <div class="student-top-row">
+    <a class="back-link" href="/student/course/{{ course.id }}/dashboard">← Back to Dashboard</a>
+    <div class="breadcrumbs">
+      {% for bc in breadcrumbs %}
+        <a href="{{ bc.href }}">{{ bc.label }}</a>{% if not loop.last %}<span>/</span>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <h1>{% if quiz_mode == 'targeted' %}Targeted Quiz{% else %}Diagnostic Quiz{% endif %}</h1>
+  <p class="muted">{{ course.title }}</p>
+
+  {% if source_status == 'draft' %}
+  <p class="warning">Using draft questions because no professor-approved set is available yet.</p>
+  {% elif source_status == 'empty' %}
+  <p class="warning">Quiz bank is not available yet. Ask professor to generate quiz bank first.</p>
+  {% endif %}
+</section>
+
+{% if questions %}
+<form method="post" action="/student/course/{{ course.id }}/quiz/submit" class="card quiz-player" id="quiz-player-form">
+  <input type="hidden" name="started_at" value="{{ started_at }}" />
+  <input type="hidden" name="quiz_mode" value="{{ quiz_mode }}" />
+
+  <div class="quiz-meta-row">
+    <p id="quiz-progress-label">Q1/{{ questions|length }}</p>
+    <div class="quiz-progress-track"><span id="quiz-progress-fill"></span></div>
+    <button type="button" class="ghost-btn tutor-open-btn">Ask Tutor</button>
+  </div>
+
+  {% for q in questions %}
+  <fieldset class="question-block quiz-step" data-step="{{ loop.index }}">
+    <legend>Question {{ loop.index }} • {{ q.topic }}</legend>
+    <p>{{ q.question }}</p>
+    {% for option in q.options %}
+      <label class="option-line quiz-option">
+        <input type="radio" name="q_{{ q.id }}" value="{{ option }}" required />
+        <span>{{ option }}</span>
+      </label>
+    {% endfor %}
+  </fieldset>
+  {% endfor %}
+
+  <div class="quiz-nav-row">
+    <button type="button" id="quiz-prev" class="ghost-btn">Previous</button>
+    <button type="button" id="quiz-next">Next</button>
+    <button type="submit" id="quiz-submit" class="hidden">Submit Quiz</button>
+  </div>
+</form>
+{% else %}
+<section class="card">
+  <h2>Quiz unavailable</h2>
+  <p class="muted">Try again later or return to dashboard.</p>
+  <div class="inline-actions">
+    <a class="button-link" href="/student/course/{{ course.id }}/dashboard">Back to Dashboard</a>
+    <a class="button-link" href="/student/course/{{ course.id }}/quiz?mode={{ quiz_mode }}">Retry</a>
+  </div>
+</section>
+{% endif %}
+
+{% include "student_tutor_drawer.html" %}
+<script src="/static/student_experience.js"></script>
+{% endblock %}

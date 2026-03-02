@@ -1,0 +1,37 @@
+<button type="button" class="tutor-fab tutor-open-btn">Ask Tutor</button>
+<aside id="student-tutor-drawer" class="student-tutor-drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <div>
+      <h3>Course Tutor</h3>
+      <p class="muted small">Continuous context from quiz attempts and gaps.</p>
+    </div>
+    <button type="button" class="drawer-close" id="student-tutor-close">Close</button>
+  </div>
+
+  {% if not has_document %}
+  <p class="warning">Course document is missing. Tutor grounding may be limited.</p>
+  {% endif %}
+
+  <section class="drawer-thread" id="student-tutor-thread">
+    {% for msg in tutor_messages %}
+    <article class="drawer-msg {{ msg.role }}">
+      <p class="msg-role">{{ msg.role|upper }}</p>
+      <p>{{ msg.message }}</p>
+      {% if msg.citations %}<p class="muted tiny">Citations: {{ msg.citations|join(', ') }}</p>{% endif %}
+    </article>
+    {% else %}
+    <p class="muted">No messages yet. Ask your first question.</p>
+    {% endfor %}
+    <div class="typing-indicator hidden" id="student-typing-indicator">
+      <span></span><span></span><span></span>
+      <p>AI is thinking...</p>
+    </div>
+  </section>
+
+  <form method="post" action="/student/course/{{ course.id }}/tutor" class="drawer-form" id="student-tutor-form">
+    <input type="hidden" name="return_to" id="student-return-to" value="{{ request.url.path }}" />
+    <label for="student-question">Ask tutor</label>
+    <textarea id="student-question" name="question" required placeholder="Explain why I got this topic wrong and what to review first."></textarea>
+    <button type="submit">Send</button>
+  </form>
+</aside>

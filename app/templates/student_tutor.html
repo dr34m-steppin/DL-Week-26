@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Tutor | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card student-shell-head fade-in">
+  <div class="student-top-row">
+    <a class="back-link" href="/student/course/{{ course.id }}/dashboard">← Back to Dashboard</a>
+    <div class="breadcrumbs">
+      {% for bc in breadcrumbs %}
+        <a href="{{ bc.href }}">{{ bc.label }}</a>{% if not loop.last %}<span>/</span>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <h1>Tutor Chat</h1>
+  <p class="muted">Continuous course-aware tutoring with citations.</p>
+  {% if not has_document %}
+  <p class="warning">Course document missing. Ask professor to upload one for stronger grounding.</p>
+  {% endif %}
+</section>
+
+<section class="card chat-box">
+  {% for msg in messages %}
+    <div class="chat {{ msg.role }}">
+      <p><strong>{{ msg.role|upper }}</strong></p>
+      <p>{{ msg.message }}</p>
+      {% if msg.citations %}<p class="muted tiny">Citations: {{ msg.citations|join(', ') }}</p>{% endif %}
+    </div>
+  {% else %}
+    <p class="muted">No messages yet.</p>
+  {% endfor %}
+</section>
+
+<form method="post" action="/student/course/{{ course.id }}/tutor" class="card" id="student-tutor-form-page">
+  <input type="hidden" name="return_to" value="/student/course/{{ course.id }}/tutor" />
+  <label>Ask a question</label>
+  <textarea name="question" required placeholder="Explain this concept in simpler terms, then give one practice question."></textarea>
+  <button type="submit">Send</button>
+</form>
+<script src="/static/student_experience.js"></script>
+{% endblock %}

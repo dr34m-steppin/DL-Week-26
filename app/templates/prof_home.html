@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Professor | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Professor Console</h1>
+  <p>Create one course, upload one document, then run the full human-in-the-loop flow.</p>
+  <div class="inline-actions">
+    <a class="button-link" href="/explore">Explore</a>
+    <a class="button-link" href="/journeys">Learning Journey</a>
+    <a class="button-link" href="/contributions">Projects & Publications</a>
+    <a class="button-link" href="/leaderboard">Leaderboard</a>
+    <a class="button-link" href="/notifications">Notifications</a>
+  </div>
+  <form method="post" action="/prof/courses/create" class="form-grid two-col">
+    <div>
+      <label>Course Title</label>
+      <input type="text" name="title" placeholder="Intro to AI" required />
+    </div>
+    <div>
+      <label>Description</label>
+      <input type="text" name="description" placeholder="Week 1: Foundations" />
+    </div>
+    <button type="submit">Create Course</button>
+  </form>
+</section>
+
+<section class="grid-2">
+  {% for course in courses %}
+  <article class="card">
+    <h3>{{ course.title }}</h3>
+    <p>{{ course.description or 'No description yet.' }}</p>
+    <a class="button-link" href="/prof/course/{{ course.id }}">Open Course</a>
+  </article>
+  {% else %}
+  <article class="card">
+    <p>No courses yet. Create one above.</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

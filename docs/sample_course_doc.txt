@@ -1,0 +1,18 @@
+Intro to AI - Week 1 Notes
+
+Artificial Intelligence studies systems that perceive, reason, learn, and act under uncertainty.
+A machine learning model maps inputs to outputs based on patterns in data.
+Supervised learning uses labeled examples, while unsupervised learning discovers structure without labels.
+Model generalization means performing well on unseen data.
+Overfitting happens when a model memorizes training examples instead of learning broader patterns.
+
+Gradient descent is an optimization method that updates parameters to reduce loss.
+The learning rate controls step size; values that are too high can diverge and too low can slow convergence.
+Backpropagation computes gradients efficiently by applying the chain rule through network layers.
+
+Bias-variance trade-off describes the balance between underfitting and overfitting.
+Cross-validation estimates model performance more reliably by rotating train/validation splits.
+Evaluation metrics should match the problem type: accuracy, precision, recall, F1, or mean squared error.
+
+Responsible AI requires transparency, fairness checks, and human oversight.
+In educational systems, professors should validate skill maps, review high-risk alerts, and confirm grading decisions.

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Learning Tools | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card student-shell-head fade-in">
+  <div class="student-top-row">
+    <a class="back-link" href="/student/course/{{ course.id }}/dashboard">← Back to Dashboard</a>
+    <div class="breadcrumbs">
+      {% for bc in breadcrumbs %}
+        <a href="{{ bc.href }}">{{ bc.label }}</a>{% if not loop.last %}<span>/</span>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <h1>Learning Tools</h1>
+  <p class="muted">Generate course summary, relearn key concepts, and solved examples from your course material.</p>
+  {% if not has_document %}
+    <p class="warning">Course document is missing. Ask professor to upload it first.</p>
+  {% endif %}
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+</section>
+
+<section class="student-grid">
+  <article class="card tool-card">
+    <h2>Generate Course Summary</h2>
+    <p class="muted">Produces overview, key concepts, prerequisites, checklist, and quick self-check questions.</p>
+    <form method="post" action="/student/course/{{ course.id }}/learning" class="form-grid">
+      <input type="hidden" name="action_type" value="summary" />
+      <label>Focus Topic (optional)</label>
+      <input type="text" name="focus_topic" value="{% if active_tool == 'summary' %}{{ focus_topic }}{% endif %}" placeholder="e.g. Gradient Descent" />
+      <button type="submit">Generate Summary</button>
+    </form>
+  </article>
+
+  <article class="card tool-card">
+    <h2>Relearn a Concept</h2>
+    <p class="muted">Explains concept simply, gives intuition, common mistakes, and mini practice.</p>
+    <form method="post" action="/student/course/{{ course.id }}/learning" class="form-grid">
+      <input type="hidden" name="action_type" value="relearn" />
+      <label>Concept</label>
+      <input type="text" name="focus_topic" value="{% if active_tool == 'relearn' %}{{ focus_topic }}{% endif %}" placeholder="e.g. Backpropagation" required />
+      <button type="submit">Relearn Concept</button>
+    </form>
+  </article>
+
+  <article class="card tool-card ai-actions-card">
+    <h2>Solved Example Questions</h2>
+    <p class="muted">Generates worked examples with problem, given, steps, final answer, and explanation.</p>
+    <form method="post" action="/student/course/{{ course.id }}/learning" class="form-grid two-col">
+      <input type="hidden" name="action_type" value="examples" />
+      <div>
+        <label>Concept</label>
+        <input type="text" name="focus_topic" value="{% if active_tool == 'examples' %}{{ focus_topic }}{% endif %}" placeholder="e.g. Expert Systems" required />
+      </div>
+      <div>
+        <label>Number of Examples</label>
+        <select name="example_count">
+          <option value="1" {% if example_count == 1 %}selected{% endif %}>1</option>
+          <option value="2" {% if example_count == 2 %}selected{% endif %}>2</option>
+          <option value="3" {% if example_count == 3 %}selected{% endif %}>3</option>
+          <option value="4" {% if example_count == 4 %}selected{% endif %}>4</option>
+          <option value="5" {% if example_count == 5 %}selected{% endif %}>5</option>
+        </select>
+      </div>
+      <button type="submit">Generate Solved Examples</button>
+    </form>
+  </article>
+</section>
+
+<section class="card fade-in">
+  <h2>Generated Content</h2>
+  {% if generated_content %}
+  <pre class="learning-output">{{ generated_content }}</pre>
+  {% else %}
+  <p class="muted">Pick one option above to generate learning content.</p>
+  {% endif %}
+</section>
+
+{% include "student_tutor_drawer.html" %}
+<script src="/static/student_experience.js"></script>
+{% endblock %}

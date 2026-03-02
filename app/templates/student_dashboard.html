@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card student-shell-head fade-in">
+  <div class="breadcrumbs">
+    {% for bc in breadcrumbs %}
+      <a href="{{ bc.href }}">{{ bc.label }}</a>{% if not loop.last %}<span>/</span>{% endif %}
+    {% endfor %}
+  </div>
+  <div class="student-top-row">
+    <div>
+      <h1>Student Dashboard</h1>
+      <p class="muted">{{ course.title }} - <span id="learning-state-label">{{ learning_state.label }}</span></p>
+    </div>
+    <a class="button-link primary-cta" id="primary-cta-btn" href="{{ learning_state.cta_href }}">{{ learning_state.cta_label }}</a>
+  </div>
+  <p class="muted" id="learning-state-reason">{{ learning_state.reason }}</p>
+  <div class="dashboard-meta">
+    <p><span class="meta-label">SnapScore</span> <strong id="snapscore-value" data-countup="{{ snapscore }}" data-endpoint="/student/course/{{ course.id }}/snapscore">0</strong></p>
+    <label class="switch">
+      <input
+        type="checkbox"
+        id="autopilot-toggle"
+        data-endpoint="/student/course/{{ course.id }}/autopilot"
+        {% if autopilot_enabled %}checked{% endif %}
+      />
+      <span class="slider"></span>
+    </label>
+    <p class="muted" id="autopilot-label">{% if autopilot_enabled %}Learning Autopilot ON{% else %}Learning Autopilot OFF{% endif %}</p>
+  </div>
+  <p class="muted tiny">Realtime fair score recalculates from mastery, accuracy, improvement, engagement, and verified contributions.</p>
+</section>
+
+<section class="student-grid">
+  <article class="card ai-actions-card stagger-card">
+    <h2>AI Next Actions</h2>
+    {% for action in next_actions %}
+    <div class="action-card">
+      <p><strong>{{ action.topic }}</strong></p>
+      <p>{{ action.action }}</p>
+      <p class="muted tiny">Confidence {{ action.confidence }} • Based on: {{ action.evidence }}</p>
+    </div>
+    {% else %}
+    <p class="muted">No next actions yet.</p>
+    {% endfor %}
+  </article>
+
+  <article class="card stagger-card">
+    <h2>Learning Tools</h2>
+    <p class="muted">Generate required study content directly from your course material.</p>
+    <div class="form-grid">
+      <a class="button-link" href="/student/course/{{ course.id }}/learning">Generate Course Summary</a>
+      <a class="button-link" href="/student/course/{{ course.id }}/learning">Relearn Concepts</a>
+      <a class="button-link" href="/student/course/{{ course.id }}/learning">Solved Example Questions</a>
+    </div>
+  </article>
+
+  <article class="card stagger-card">
+    <h2>Mastery + Struggle</h2>
+    {% for state in topic_states %}
+    <div class="mastery-row">
+      <p><strong>{{ state.topic }}</strong></p>
+      <div class="progress-track"><span data-fill="{{ (state.mastery_score * 100)|round(1) }}"></span></div>
+      <p class="muted tiny">Mastery {{ (state.mastery_score * 100)|round(1) }}% • Struggle {{ (state.struggle_score * 100)|round(1) }}%</p>
+    </div>
+    {% else %}
+    <p class="muted">No mastery data yet. Start diagnostic quiz.</p>
+    {% endfor %}
+  </article>
+
+  <article class="card stagger-card">
+    <h2>{{ adaptive_state.engine_name }}</h2>
+    <div class="adaptive-state-grid">
+      <p><span class="meta-label">Risk Level</span> <strong>{{ adaptive_state.risk_level }}</strong></p>
+      <p><span class="meta-label">Gap Topic</span> <strong>{{ adaptive_state.gap_topic }}</strong></p>
+      <p><span class="meta-label">Intervention</span> <strong>{{ adaptive_state.intervention_status }}</strong></p>
+      <p><span class="meta-label">Reassessment</span> <strong>{{ adaptive_state.reassessment_cycle }}</strong></p>
+    </div>
+    <div class="reason-box">
+      <p class="meta-label">Why was this recommended?</p>
+      <p>{{ adaptive_state.reasoning }}</p>
+    </div>
+  </article>
+
+  <article class="card stagger-card">
+    <h2>Mastery Delta</h2>
+    {% for item in mastery_delta %}
+    <div class="delta-row">
+      <p><strong>{{ item.topic }}</strong></p>
+      <p class="muted tiny">{{ item.before_pct }}% → {{ item.after_pct }}% ({{ item.delta_sign }}{{ item.delta_pct }}%)</p>
+    </div>
+    {% else %}
+    <p class="muted">No mastery change yet. Complete at least one quiz attempt.</p>
+    {% endfor %}
+  </article>
+
+  <article class="card stagger-card">
+    <h2>Recent Attempts</h2>
+    {% for attempt in recent_attempts %}
+      <p>{{ attempt.created_at }} • {{ attempt.topic }} • {% if attempt.is_correct %}Correct{% else %}Wrong{% endif %}</p>
+    {% else %}
+      <p class="muted">No attempts yet.</p>
+    {% endfor %}
+  </article>
+
+  <article class="card stagger-card">
+    <h2>Grades</h2>
+    {% for g in grading %}
+      <p>{{ g.created_at }} • {{ g.score_percent }}% • AI {{ g.ai_recommended_grade }} • {{ g.professor_decision }}</p>
+      {% if g.professor_notes %}<p class="muted tiny">{{ g.professor_notes }}</p>{% endif %}
+    {% else %}
+      <p class="muted">No grading records yet.</p>
+    {% endfor %}
+  </article>
+</section>
+
+{% include "student_tutor_drawer.html" %}
+<script src="/static/student_experience.js"></script>
+{% endblock %}

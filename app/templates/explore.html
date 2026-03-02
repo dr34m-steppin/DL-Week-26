@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Explore | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Explore Discovery Layer</h1>
+  <p class="muted">Universal search across journeys, projects, publications, and emerging technology updates.</p>
+  <form method="get" action="/explore" class="form-grid two-col">
+    <div>
+      <label>Search</label>
+      <input type="text" name="q" value="{{ filters.q }}" placeholder="heuristic search, transformer, robotics..." />
+    </div>
+    <div>
+      <label>Domain</label>
+      <select name="domain">
+        <option value="">All</option>
+        {% for d in domains %}
+        <option value="{{ d.slug }}" {% if filters.domain == d.slug %}selected{% endif %}>{{ d.display_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Content Type</label>
+      <select name="content_type">
+        <option value="">All</option>
+        <option value="journey" {% if filters.content_type == 'journey' %}selected{% endif %}>Journey</option>
+        <option value="project" {% if filters.content_type == 'project' %}selected{% endif %}>Project</option>
+        <option value="publication" {% if filters.content_type == 'publication' %}selected{% endif %}>Publication</option>
+        <option value="article" {% if filters.content_type == 'article' %}selected{% endif %}>Article</option>
+        <option value="open_source" {% if filters.content_type == 'open_source' %}selected{% endif %}>Open Source</option>
+      </select>
+    </div>
+    <div>
+      <label>Sort</label>
+      <select name="sort">
+        <option value="recommended" {% if filters.sort == 'recommended' %}selected{% endif %}>Recommended</option>
+        <option value="newest" {% if filters.sort == 'newest' %}selected{% endif %}>Newest</option>
+        <option value="popular" {% if filters.sort == 'popular' %}selected{% endif %}>Popular</option>
+      </select>
+    </div>
+    <label><input type="checkbox" name="verified_only" value="1" {% if filters.verified_only %}checked{% endif %} /> Verified only</label>
+    <button type="submit">Search & Sort</button>
+  </form>
+</section>
+
+<section class="grid-2">
+  {% for item in items %}
+  <article class="card">
+    <h3>{{ item.title }}</h3>
+    <p class="muted">{{ item.kind }} • {{ item.type }} • {{ item.domain }}</p>
+    <p>{{ item.summary }}</p>
+    <p class="muted tiny">Interest score: {{ item.interest_score }} • Rank score: {{ item.rank_score }}</p>
+    <p class="muted tiny">Verified: {% if item.verified %}Yes{% else %}No{% endif %}</p>
+    <a class="button-link" href="{{ item.link }}">Open</a>
+  </article>
+  {% else %}
+  <article class="card">
+    <p>No items found for current filters.</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

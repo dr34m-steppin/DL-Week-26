@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Account | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Account</h1>
+  <p class="muted">Minimal profile view with transparent reputation and course snapscore tracking.</p>
+  <form method="post" action="/account/profile" class="form-grid two-col">
+    <div>
+      <label>Full Name</label>
+      <input type="text" name="full_name" value="{{ user.full_name }}" required />
+    </div>
+    <div>
+      <label>Email</label>
+      <input type="text" value="{{ user.email }}" disabled />
+    </div>
+    <div>
+      <label>Role</label>
+      <input type="text" value="{{ user.role }}" disabled />
+    </div>
+    <div>
+      <label>Learner Type</label>
+      <input type="text" value="{{ profile.user_type }}" disabled />
+    </div>
+    <button type="submit">Update Profile</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Global SnapScore</h2>
+  <p><strong>{{ reputation.snapscore }}</strong></p>
+  <p class="muted tiny">
+    Mastery {{ reputation.components.mastery }} • Quiz {{ reputation.components.quiz_accuracy }} •
+    Project Completion {{ reputation.components.project_completion }} • Peer Validation {{ reputation.components.peer_validation }} •
+    Originality {{ reputation.components.originality }} • Impact {{ reputation.components.impact }}
+  </p>
+</section>
+
+<section class="grid-2">
+  {% for c in course_cards %}
+  <article class="card">
+    <h3>{{ c.title }}</h3>
+    <p class="muted">{{ c.description or 'No description' }}</p>
+    {% if c.snap %}
+    <p><strong>Realtime Course SnapScore:</strong> {{ c.snap.score }}</p>
+    <p class="muted tiny">
+      Mastery {{ c.snap.mastery_pct }} • Accuracy {{ c.snap.accuracy_pct }} •
+      Improvement {{ c.snap.improvement_pct }} • Engagement {{ c.snap.engagement_pct }} •
+      Contribution Bonus {{ c.snap.contribution_bonus }}
+    </p>
+    {% endif %}
+  </article>
+  {% else %}
+  <article class="card"><p>No associated courses yet.</p></article>
+  {% endfor %}
+</section>
+{% endblock %}

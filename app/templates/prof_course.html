@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+{% block title %}Professor Course | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card prof-hero fade-in">
+  <div class="prof-hero-row">
+    <div>
+      <p class="kicker">Professor Control Center</p>
+      <h1>{{ course.title }}</h1>
+      <p class="muted">{{ course.description or 'Adaptive curriculum orchestration for this course.' }}</p>
+    </div>
+    <div class="engine-badge">Adaptive Learning Engine Active</div>
+  </div>
+
+  <div class="metric-strip">
+    <article class="metric-card">
+      <p>Workflow Completion</p>
+      <h3 id="workflow-progress-label">{{ workflow.progress_pct }}%</h3>
+      <div class="meter"><span id="workflow-progress-bar" style="width: {{ workflow.progress_pct }}%"></span></div>
+    </article>
+    <article class="metric-card">
+      <p>Learning Gap Closed</p>
+      <h3 id="gap-closed-label" data-target="{{ workflow.gap_closed_pct }}">{{ workflow.gap_closed_pct }}%</h3>
+      <div class="meter"><span class="emerald" style="width: {{ workflow.gap_closed_pct }}%"></span></div>
+    </article>
+    <article class="metric-card">
+      <p>Dynamic Improvement</p>
+      <h3 id="improvement-label" data-target="{{ improvement or workflow.improvement_pct }}">{{ improvement or workflow.improvement_pct }}%</h3>
+      <div class="meter"><span class="indigo" style="width: {{ improvement or workflow.improvement_pct }}%"></span></div>
+    </article>
+  </div>
+</section>
+
+<section class="card workflow-board fade-in">
+  <h2>Workflow</h2>
+  <p class="muted">Structured pipeline for upload, mapping, validation, and quiz generation.</p>
+  <div class="workflow-grid">
+    {% for step in workflow.steps %}
+    <article class="workflow-step {{ step.status | lower | replace(' ', '-') }}" data-step="{{ step.number }}">
+      <div class="step-head">
+        <p>Step {{ step.number }}</p>
+        <span class="status-pill {{ step.status | lower | replace(' ', '-') }}">{{ step.status }}</span>
+      </div>
+      <h3>{{ step.title }}</h3>
+
+      {% if step.number == 1 %}
+      <form method="post" action="/prof/course/{{ course.id }}/upload-doc" enctype="multipart/form-data" class="step-form" id="upload-form">
+        <input type="file" name="file" accept=".pdf,.txt,.md" required />
+        <button type="submit">Upload Course Doc</button>
+      </form>
+      {% if document %}
+      <p class="muted small">Current doc: <strong>{{ document.filename }}</strong></p>
+      {% else %}
+      <p class="muted small">No document uploaded yet.</p>
+      {% endif %}
+      {% endif %}
+
+      {% if step.number == 2 %}
+      <form method="post" action="/prof/course/{{ course.id }}/generate-skill-map" class="step-form generate-form" data-loading-target="skill-map">
+        <button type="submit" class="full">Generate Skill Map</button>
+      </form>
+      <p class="muted small">AI infers topics and prerequisites directly from the uploaded course content.</p>
+      {% endif %}
+
+      {% if step.number == 3 %}
+      <p class="muted small">Validated topics: <strong id="validated-count">{{ workflow.validated_count }}</strong> / {{ workflow.total_skills }}</p>
+      <p class="muted small">Review skill cards below and save all updates in one action.</p>
+      {% endif %}
+
+      {% if step.number == 4 %}
+      <form method="post" action="/prof/course/{{ course.id }}/generate-quiz" class="quiz-config-panel generate-form" id="quiz-config-form" data-loading-target="quiz">
+        <label>Number of Questions: <span id="question-count-label">8</span></label>
+        <input type="range" name="count" id="question-count-slider" min="3" max="20" value="8" />
+
+        <label>Difficulty</label>
+        <select name="difficulty">
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate" selected>Intermediate</option>
+          <option value="Advanced">Advanced</option>
+        </select>
+
+        <label>Coverage Scope</label>
+        <div class="segmented-control">
+          <label><input type="radio" name="coverage_scope" value="all" checked /> All topics</label>
+          <label><input type="radio" name="coverage_scope" value="selected" /> Selected topics</label>
+        </div>
+
+        <div id="topic-selection" class="topic-selection hidden">
+          {% for skill in skill_map %}
+          <label class="topic-chip-select">
+            <input type="checkbox" class="topic-selector" value="{{ skill.topic }}" />
+            <span>{{ skill.topic }}</span>
+          </label>
+          {% else %}
+          <p class="muted small">Generate skill map first to select specific topics.</p>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="selected_topics" id="selected-topics-input" value="" />
+
+        <label>Bloom's Taxonomy</label>
+        <select name="blooms_level">
+          <option value="Remember">Remember</option>
+          <option value="Apply" selected>Apply</option>
+          <option value="Analyze">Analyze</option>
+        </select>
+
+        <button type="submit" class="full generate-btn" id="generate-quiz-btn">Generate Quiz Bank</button>
+        <div class="generation-progress" id="generation-progress"><span></span></div>
+      </form>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+
+  {% if document %}
+  <details class="doc-preview-wrap">
+    <summary>Preview Uploaded Document</summary>
+    <pre class="doc-preview">{{ document.raw_text[:2400] }}</pre>
+  </details>
+  {% endif %}
+</section>
+
+<section class="card skill-map-panel fade-in">
+  <div class="section-title-row">
+    <div>
+      <h2>Skill Map Validation</h2>
+      <p class="muted">Collaborative AI + professor review with confidence, rationale, and prerequisite editing.</p>
+    </div>
+  </div>
+
+  <form method="post" action="/prof/course/{{ course.id }}/skill-map/save-all" id="skill-map-form">
+    <input type="hidden" name="skill_ids" value="{% for skill in skill_map %}{{ skill.id }}{% if not loop.last %},{% endif %}{% endfor %}" />
+
+    <div class="skill-card-grid">
+      {% for skill in skill_map %}
+      <article class="skill-card" data-skill-id="{{ skill.id }}" data-original-prereq="{{ skill.prerequisites_text }}" data-original-topic="{{ skill.topic }}">
+        <div class="skill-card-head">
+          <span class="confidence-badge">{{ skill.confidence_score }}%</span>
+          <h3><input type="text" name="topic_{{ skill.id }}" value="{{ skill.topic }}" class="topic-input" /></h3>
+        </div>
+
+        <div class="skill-badges">
+          <span class="tag-badge">{{ skill.category }}</span>
+          <span class="status-badge {{ skill.status_badge | lower | replace(' ', '-') }}">{{ skill.status_badge }}</span>
+        </div>
+
+        <div class="confidence-meter">
+          <span style="width: {{ skill.confidence_score }}%"></span>
+        </div>
+
+        <p class="ai-explanation">{{ skill.ai_reason }}</p>
+
+        <label>Prerequisites</label>
+        <div class="chip-editor" data-hidden-input="prereq-hidden-{{ skill.id }}">
+          <div class="chip-list"></div>
+          <input type="text" class="chip-input" placeholder="Add prerequisite + Enter" />
+        </div>
+        <input type="hidden" id="prereq-hidden-{{ skill.id }}" name="prerequisites_{{ skill.id }}" value="{{ skill.prerequisites_text }}" />
+
+        <div class="skill-row">
+          <label class="switch">
+            <input type="checkbox" name="validated_{{ skill.id }}" class="validate-toggle" {% if skill.validated %}checked{% endif %} />
+            <span class="slider"></span>
+          </label>
+          <span class="muted">Human validated</span>
+        </div>
+
+        <div class="suggestion-note hidden">Suggested improvement captured from professor edit.</div>
+
+        <button type="button" class="reasoning-trigger" data-topic="{{ skill.topic }}" data-reason="{{ skill.ai_reason }}" data-prereqs="{{ skill.prerequisites_text }}">Why was this prerequisite chosen?</button>
+
+        <button type="button" class="accordion-trigger">View deeper AI reasoning</button>
+        <div class="accordion-content">
+          <p class="muted">AI reasoning: {{ skill.ai_reason }}</p>
+          <label>Professor note / override rationale</label>
+          <textarea name="notes_{{ skill.id }}">{{ skill.ai_reason }}</textarea>
+        </div>
+      </article>
+      {% else %}
+      <article class="empty-state card">
+        <p class="muted">No skill map yet. Generate from uploaded document first.</p>
+      </article>
+      {% endfor %}
+    </div>
+
+    <button type="submit" id="save-all-btn" class="save-all-btn">Save All Changes</button>
+  </form>
+</section>
+
+<section class="grid-2 fade-in">
+  <article class="card review-panel">
+    <h2>Risk Review and Override</h2>
+    <p class="muted">Review AI assessment first, then apply instructor action with rationale.</p>
+    {% if risk_flags %}
+    {% set initial_risk = selected_risk or risk_flags[0] %}
+    <form method="get" action="/prof/course/{{ course.id }}" class="record-picker-form">
+      {% if selected_grading %}
+      <input type="hidden" name="grading_selected" value="{{ selected_grading.id }}" />
+      {% endif %}
+      <label for="risk-record-select">Select Risk Record</label>
+      <select id="risk-record-select" name="risk_selected" onchange="this.form.submit()">
+        {% for flag in risk_flags %}
+        <option value="{{ flag.id }}" {% if flag.id == initial_risk.id %}selected{% endif %}>
+          {{ flag.student_name }} - {{ flag.topic }} - {{ flag.risk_level }}
+        </option>
+        {% endfor %}
+      </select>
+    </form>
+
+    <form
+      method="post"
+      action="/prof/course/{{ course.id }}/risk/{{ initial_risk.id }}/override"
+      class="review-card compact-form consolidated-review"
+      id="risk-override-form"
+    >
+      <input type="hidden" name="risk_selected" value="{{ initial_risk.id }}" />
+      {% if selected_grading %}
+      <input type="hidden" name="grading_selected" value="{{ selected_grading.id }}" />
+      {% endif %}
+      <section class="review-block">
+        <h3>Current AI Assessment</h3>
+        <p><span class="meta-label">Student</span> <strong>{{ initial_risk.student_name }}</strong></p>
+        <p><span class="meta-label">Topic</span> <strong>{{ initial_risk.topic }}</strong></p>
+        <p>
+          <span class="meta-label">AI Risk Level</span>
+          <span class="level-badge risk-{{ initial_risk.risk_level_class }}">{{ initial_risk.risk_level }}</span>
+        </p>
+        <p><span class="meta-label">Confidence</span> {{ initial_risk.ai_confidence }}%</p>
+        <p><span class="meta-label">Reason</span> {{ initial_risk.reason }}</p>
+      </section>
+
+      <section class="review-block">
+        <h3>Human Override Decision</h3>
+        <label for="risk-status">Override Action</label>
+        <select id="risk-status" name="status" required>
+          <option value="OPEN" {% if initial_risk.status == 'OPEN' %}selected{% endif %}>Keep AI Assessment</option>
+          <option value="MONITOR" {% if initial_risk.status == 'MONITOR' %}selected{% endif %}>Monitor Closely</option>
+          <option value="DISMISSED" {% if initial_risk.status == 'DISMISSED' %}selected{% endif %}>Clear Risk</option>
+          <option value="RESOLVED" {% if initial_risk.status == 'RESOLVED' %}selected{% endif %}>Close Investigation</option>
+        </select>
+
+        <label for="risk-note">Override Note</label>
+        <textarea id="risk-note" name="note" placeholder="Document why this decision is appropriate." required>{{ initial_risk.professor_override }}</textarea>
+        <p class="muted small audit-warning">This decision is logged in the audit trail.</p>
+      </section>
+
+      <div class="review-actions">
+        <button type="submit" class="review-submit-btn">Apply Override</button>
+      </div>
+    </form>
+    {% else %}
+    <p class="muted">No risk flags yet.</p>
+    {% endif %}
+  </article>
+
+  <article class="card review-panel">
+    <h2>Grading Review and Finalization</h2>
+    <p class="muted">Separate AI recommendation from instructor final grade decision.</p>
+    {% if grading_reviews %}
+    {% set initial_review = selected_grading or grading_reviews[0] %}
+    <form method="get" action="/prof/course/{{ course.id }}" class="record-picker-form">
+      {% if selected_risk %}
+      <input type="hidden" name="risk_selected" value="{{ selected_risk.id }}" />
+      {% endif %}
+      <label for="grading-record-select">Select Grading Record</label>
+      <select id="grading-record-select" name="grading_selected" onchange="this.form.submit()">
+        {% for review in grading_reviews %}
+        <option value="{{ review.id }}" {% if review.id == initial_review.id %}selected{% endif %}>
+          {{ review.student_name }} - {{ review.score_percent }}% - AI {{ review.ai_recommended_grade }}
+        </option>
+        {% endfor %}
+      </select>
+    </form>
+
+    <form
+      method="post"
+      action="/prof/course/{{ course.id }}/grading/{{ initial_review.id }}/decision"
+      class="review-card compact-form grading-review-form consolidated-review"
+      id="grading-decision-form"
+    >
+      {% if selected_risk %}
+      <input type="hidden" name="risk_selected" value="{{ selected_risk.id }}" />
+      {% endif %}
+      <input type="hidden" name="grading_selected" value="{{ initial_review.id }}" />
+      <section class="review-block">
+        <h3>Current AI Assessment</h3>
+        <p><span class="meta-label">Student</span> <strong>{{ initial_review.student_name }}</strong></p>
+        <p>
+          <span class="meta-label">Score</span>
+          <span class="grade-score grade-{{ initial_review.grade_class }}">{{ initial_review.score_percent }}%</span>
+        </p>
+        <p>
+          <span class="meta-label">AI Grade</span>
+          <span class="level-badge grade-{{ initial_review.grade_class }}">{{ initial_review.ai_recommended_grade }}</span>
+        </p>
+        <p><span class="meta-label">Confidence</span> {{ initial_review.ai_confidence }}%</p>
+        <p><span class="meta-label">Reason</span> {{ initial_review.ai_reason }}</p>
+      </section>
+
+      <section class="review-block">
+        <h3>Human Override Decision</h3>
+        <label for="decision">Instructor Decision</label>
+        <select id="decision" name="decision" class="grade-decision-select" required>
+          <option value="" {% if initial_review.professor_decision == 'PENDING' and not initial_review.professor_notes %}selected{% endif %}>Select review decision</option>
+          <option value="CONFIRMED" {% if initial_review.professor_decision == 'CONFIRMED' %}selected{% endif %}>Accept AI Grade</option>
+          <option value="OVERRIDDEN" {% if initial_review.professor_decision == 'OVERRIDDEN' %}selected{% endif %}>Override Grade</option>
+          <option value="PENDING" {% if initial_review.professor_decision == 'PENDING' and initial_review.professor_notes %}selected{% endif %}>Keep Pending</option>
+        </select>
+
+        <div class="override-grade-wrap {% if initial_review.professor_decision != 'OVERRIDDEN' %}hidden{% endif %}" id="override-grade-wrap">
+          <label for="override-grade">Manual Grade</label>
+          <select id="override-grade" name="override_grade" {% if initial_review.professor_decision == 'OVERRIDDEN' %}required{% endif %}>
+            <option value="">Select manual grade</option>
+            <option value="A" {% if initial_review.manual_grade == 'A' %}selected{% endif %}>A</option>
+            <option value="B" {% if initial_review.manual_grade == 'B' %}selected{% endif %}>B</option>
+            <option value="C" {% if initial_review.manual_grade == 'C' %}selected{% endif %}>C</option>
+            <option value="D" {% if initial_review.manual_grade == 'D' %}selected{% endif %}>D</option>
+            <option value="F" {% if initial_review.manual_grade == 'F' %}selected{% endif %}>F</option>
+          </select>
+        </div>
+
+        <label for="grade-note">Instructor Notes</label>
+        <textarea id="grade-note" name="notes" placeholder="Explain rubric judgment and any override reason." required>{{ initial_review.professor_notes }}</textarea>
+        <p class="muted small audit-warning">Final decisions are logged and visible in the audit trail.</p>
+      </section>
+
+      <div class="review-actions">
+        <button type="submit" class="review-submit-btn">Confirm and Lock Grade</button>
+      </div>
+    </form>
+    {% else %}
+    <p class="muted">No grading reviews yet.</p>
+    {% endif %}
+  </article>
+</section>
+
+<aside id="reason-drawer" class="reason-drawer" aria-hidden="true">
+  <div class="reason-drawer-head">
+    <h3 id="drawer-topic">AI Reasoning Preview</h3>
+    <button type="button" id="drawer-close">Close</button>
+  </div>
+  <p class="muted">Why was this prerequisite chosen?</p>
+  <p id="drawer-reason"></p>
+  <div class="drawer-prereq" id="drawer-prereq"></div>
+</aside>
+
+<div id="toast" class="toast"></div>
+<script id="ui-flags" type="application/json">{{ {"toast": toast, "improvement": improvement} | tojson }}</script>
+<script src="/static/prof_dashboard.js"></script>
+{% endblock %}

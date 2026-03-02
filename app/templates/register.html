@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Register | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Create Account</h1>
+  <p>Choose role and interests to enable adaptive journeys, discovery, and ranking.</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post" action="/register" class="form-grid">
+    <label>Full Name</label>
+    <input type="text" name="full_name" required />
+    <label>Email</label>
+    <input type="email" name="email" required />
+    <label>Password</label>
+    <input type="password" name="password" required minlength="6" />
+    <label>Role</label>
+    <select name="role" required>
+      <option value="student">Student</option>
+      <option value="professor">Professor</option>
+    </select>
+    <label>Learner Type (for students/professionals)</label>
+    <select name="learner_type">
+      <option value="student">Student</option>
+      <option value="professional">Working Professional</option>
+    </select>
+    <label>Interest Domains (comma separated)</label>
+    <input type="text" name="interest_domains" placeholder="ai, robotics, finance" />
+    <label>Goals (comma separated)</label>
+    <input type="text" name="goals" placeholder="job-ready, research, startup" />
+    <button type="submit">Register</button>
+  </form>
+</section>
+{% endblock %}

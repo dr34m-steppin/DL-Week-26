@@ -1,0 +1,175 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 2111 >>
+stream
+BT
+/F1 11 Tf
+50 782 Td
+(# ReLearnAI Project Documentation) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 1. Problem and Motivation) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (Students produce rich interaction data but still lack a clear answer to: *what should I do) Tj
+0 -14 Td (next?* Existing tools answer questions but rarely maintain an evolving, explainable learning) Tj
+0 -14 Td (state over time.) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 2. Proposed Solution) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (ReLearnAI is an AI-assisted learning loop for one course:) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (1. Ingest course material) Tj
+0 -14 Td (2. Build skill map + prerequisites) Tj
+0 -14 Td (3. Generate diagnostic quiz) Tj
+0 -14 Td (4. Auto-grade and update learning state) Tj
+0 -14 Td (5. Recommend next action) Tj
+0 -14 Td (6. Keep professor in control for validation and overrides) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 3. System Design) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (### 3.1 Components) Tj
+0 -14 Td (- **Course Knowledge Base**: uploaded course document stored as text) Tj
+0 -14 Td (- **Retriever \(RAG-lite\)**: lexical chunk retrieval with citation references) Tj
+0 -14 Td (- **Quiz Generator**: configurable LLM provider \(Azure/OpenAI/HF/mock\)) Tj
+0 -14 Td (- **Mastery Engine**: topic-level mastery + struggle + risk computation) Tj
+0 -14 Td (- **SnapScore**: motivation and consistency score) Tj
+0 -14 Td (- **Professor HITL Layer**:) Tj
+0 -14 Td (- skill map validation) Tj
+0 -14 Td (- quiz approval/editing) Tj
+0 -14 Td (- risk flag overrides) Tj
+0 -14 Td (- grade confirmation/override) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (### 3.2 Data Model) Tj
+0 -14 Td (Core entities:) Tj
+0 -14 Td (- users) Tj
+0 -14 Td (- courses) Tj
+0 -14 Td (- course_documents) Tj
+0 -14 Td (- skill_map) Tj
+0 -14 Td (- quiz_questions) Tj
+0 -14 Td (- quiz_attempts) Tj
+0 -14 Td (- student_topic_state) Tj
+0 -14 Td (- snapscore_events) Tj
+0 -14 Td (- risk_flags) Tj
+0 -14 Td (- grading_reviews) Tj
+0 -14 Td (- chat_messages) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 4. Learning-State Modeling) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (Per topic:) Tj
+0 -14 Td (- `mastery = \(correct + 1\) / \(attempts + 2\)`) Tj
+ET
+endstream
+endobj
+3 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+4 0 obj
+<< /Length 2413 >>
+stream
+BT
+/F1 11 Tf
+50 782 Td
+(- `struggle = weighted\(low mastery, response latency, wrong streak\)`) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (Risk policy:) Tj
+0 -14 Td (- LOW: insufficient data or healthy trajectory) Tj
+0 -14 Td (- MEDIUM: moderate mastery/struggle concern) Tj
+0 -14 Td (- HIGH: persistently low mastery with enough attempts) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (This makes progression explainable and deterministic.) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 5. Human-in-the-Loop Controls) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (Professor controls are explicit and auditable:) Tj
+0 -14 Td (- Validate/edit skill map topics and prerequisites) Tj
+0 -14 Td (- Approve/edit each AI-generated quiz question) Tj
+0 -14 Td (- Override risk flags with status + rationale) Tj
+0 -14 Td (- Confirm or override AI grade recommendation) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (This satisfies agency and trust requirements in education.) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 6. Responsible AI Considerations) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (- **Explainability**: citations in tutor responses and visible score formulas) Tj
+0 -14 Td (- **Consistency**: deterministic fallback mode \(`mock`\) for reproducible runs) Tj
+0 -14 Td (- **Bias mitigation**: professor review gates for all high-impact outputs) Tj
+0 -14 Td (- **Privacy**: minimal local storage, no unnecessary personal data) Tj
+0 -14 Td (- **Human agency**: override mechanisms throughout grading/risk flows) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 7. Implementation Completeness \(MVP\)) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (Implemented:) Tj
+0 -14 Td (- auth + role separation) Tj
+0 -14 Td (- upload 1 document) Tj
+0 -14 Td (- chat with citations) Tj
+0 -14 Td (- quiz generation) Tj
+0 -14 Td (- auto grading) Tj
+0 -14 Td (- evolving score updates) Tj
+0 -14 Td (- student dashboard) Tj
+0 -14 Td (- professor dashboard with HITL controls) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 8. Limitations) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (- Current retriever is lexical, not embedding-based) Tj
+0 -14 Td (- Single-instance SQLite \(not production scale\)) Tj
+0 -14 Td (- No full LMS sync in MVP \(Canvas integration planned\)) Tj
+0 -14 Td (- Skill graph is relationally represented \(Neo4j is next phase\)) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 9. Future Work) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (- Canvas API sync for assignments and gradebook) Tj
+0 -14 Td (- Azure AI Search embedding retrieval) Tj
+0 -14 Td (- Neo4j concept graph for richer prerequisite paths) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 377 >>
+stream
+BT
+/F1 11 Tf
+50 782 Td
+(- longitudinal drift detection across semesters) Tj
+0 -14 Td (- cohort fairness analytics) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (## 10. Reproducibility) Tj
+0 -14 Td ( ) Tj
+0 -14 Td (All setup and test steps are in:) Tj
+0 -14 Td (- `README.md`) Tj
+0 -14 Td (- `testbench/SETUP_AND_RUN.md`) Tj
+0 -14 Td (- `testbench/SMOKE_TEST_CHECKLIST.md`) Tj
+0 -14 Td ( ) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+endobj
+9 0 obj
+<< /Type /Catalog /Pages 8 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000002242 00000 n 
+0000002368 00000 n 
+0000004833 00000 n 
+0000004959 00000 n 
+0000005387 00000 n 
+0000005513 00000 n 
+0000005582 00000 n 
+trailer
+<< /Size 10 /Root 9 0 R >>
+startxref
+5631
+%%EOF

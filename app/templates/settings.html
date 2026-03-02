@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Settings | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Settings</h1>
+  <p class="muted">Configure interest profile used by adaptive recommendations, explore ranking, and notifications.</p>
+  <form method="post" action="/settings" class="form-grid two-col">
+    <div>
+      <label>User Type</label>
+      <select name="user_type">
+        <option value="student" {% if profile.user_type == 'student' %}selected{% endif %}>Student</option>
+        <option value="professional" {% if profile.user_type == 'professional' %}selected{% endif %}>Working Professional</option>
+        <option value="professor" {% if profile.user_type == 'professor' %}selected{% endif %}>Professor</option>
+      </select>
+    </div>
+    <div>
+      <label>Skill Level</label>
+      <select name="skill_level">
+        <option value="beginner" {% if profile.skill_level == 'beginner' %}selected{% endif %}>Beginner</option>
+        <option value="intermediate" {% if profile.skill_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+        <option value="advanced" {% if profile.skill_level == 'advanced' %}selected{% endif %}>Advanced</option>
+      </select>
+    </div>
+    <div>
+      <label>Domains (comma separated)</label>
+      <input type="text" name="domains" value="{{ profile.domains | join(', ') }}" placeholder="ai, robotics, finance" />
+      <p class="muted tiny">Available: {% for d in domains %}{{ d.display_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    </div>
+    <div>
+      <label>Goals (comma separated)</label>
+      <input type="text" name="goals" value="{{ profile.goals | join(', ') }}" placeholder="job-ready, research, startup, exam" />
+    </div>
+    <div>
+      <label>Learning Style</label>
+      <select name="learning_style">
+        <option value="projects" {% if profile.learning_style == 'projects' %}selected{% endif %}>Projects</option>
+        <option value="quizzes" {% if profile.learning_style == 'quizzes' %}selected{% endif %}>Quizzes</option>
+        <option value="reading" {% if profile.learning_style == 'reading' %}selected{% endif %}>Reading</option>
+      </select>
+    </div>
+    <div>
+      <label>Time Commitment (minutes/day)</label>
+      <input type="number" min="15" max="600" name="time_commitment_min" value="{{ profile.time_commitment_min }}" />
+    </div>
+    <button type="submit">Save Settings</button>
+  </form>
+</section>
+{% endblock %}

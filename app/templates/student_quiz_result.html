@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Quiz Results | ReLearnAI{% endblock %}
+{% block content %}
+<section class="card student-shell-head fade-in">
+  <div class="student-top-row">
+    <a class="back-link" href="/student/course/{{ course.id }}/dashboard">← Back to Dashboard</a>
+    <div class="breadcrumbs">
+      {% for bc in breadcrumbs %}
+        <a href="{{ bc.href }}">{{ bc.label }}</a>{% if not loop.last %}<span>/</span>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <h1>Results and Next Step</h1>
+  <p><strong>Score:</strong> {{ score_percent }}% ({{ correct_count }}/{{ total_questions }})</p>
+  <p><strong>AI Grade:</strong> {{ ai_grade }} (pending instructor confirmation)</p>
+  <p><strong>SnapScore:</strong> {{ snapscore }}</p>
+  <p class="muted">Dynamic improvement: {% if improvement_pct >= 0 %}+{% endif %}{{ improvement_pct }}%</p>
+</section>
+
+<section class="student-grid">
+  <article class="card stagger-card">
+    <h2>Skill Impact</h2>
+    {% for impact in skill_impacts %}
+      <p>{{ impact.topic }} mastery {% if impact.delta >= 0 %}+{% endif %}{{ impact.delta }}%</p>
+    {% else %}
+      <p class="muted">No measurable topic impact for this attempt.</p>
+    {% endfor %}
+  </article>
+
+  <article class="card stagger-card">
+    <h2>Mistake Breakdown</h2>
+    {% for m in mistake_breakdown %}
+      <div class="mistake-item">
+        <p><strong>{{ m.topic }}</strong> — {{ m.question }}</p>
+        <p class="muted tiny">Selected: {{ m.selected }}</p>
+        <p class="muted tiny">Correct: {{ m.correct }}</p>
+        <p class="muted tiny">Why: {{ m.explanation }}</p>
+      </div>
+    {% else %}
+      <p class="muted">No mistakes in this attempt.</p>
+    {% endfor %}
+  </article>
+
+  <article class="card stagger-card ai-actions-card">
+    <h2>Recommended Actions</h2>
+    {% for item in recommendations %}
+      <p>{{ loop.index }}. {{ item.topic }} (mastery {{ (item.mastery_score * 100)|round(1) }}%)</p>
+    {% else %}
+      <p class="muted">No recommendations yet.</p>
+    {% endfor %}
+  </article>
+</section>
+
+<section class="card fade-in">
+  <div class="inline-actions">
+    <a class="button-link" href="/student/course/{{ course.id }}/quiz?mode=targeted">Retake Targeted Quiz</a>
+    <button type="button" class="button-link tutor-open-btn">Ask Tutor</button>
+    <a class="button-link" href="/student/course/{{ course.id }}/learning">Learning Tools</a>
+    <a class="button-link" href="/student/course/{{ course.id }}/dashboard">Back to Dashboard</a>
+  </div>
+</section>
+
+{% include "student_tutor_drawer.html" %}
+<script src="/static/student_experience.js"></script>
+{% endblock %}
