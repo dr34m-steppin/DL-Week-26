@@ -685,11 +685,18 @@ def _open_sqlite_connection() -> sqlite3.Connection:
 
 def get_connection():
     if _using_postgres():
-        if psycopg2 is None:
-            raise RuntimeError("DATABASE_URL is set but psycopg2 is not installed. Add psycopg2-binary to requirements.")
         db_url = _database_url()
+        if psycopg2 is None:
+            if _allow_sqlite_fallback():
+                print("[db] psycopg2 unavailable, falling back to SQLite", flush=True)
+                return _open_sqlite_connection()
+            raise RuntimeError("DATABASE_URL is set but psycopg2 is not installed. Add psycopg2-binary to requirements.")
+
         parsed = urlparse(db_url)
         if not parsed.scheme.startswith("postgres"):
+            if _allow_sqlite_fallback():
+                print("[db] DATABASE_URL has invalid scheme, falling back to SQLite", flush=True)
+                return _open_sqlite_connection()
             raise RuntimeError("DATABASE_URL must start with postgresql:// or postgres://")
         try:
             raw_conn = psycopg2.connect(db_url, connect_timeout=12)
