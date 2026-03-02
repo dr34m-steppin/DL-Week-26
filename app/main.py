@@ -92,6 +92,51 @@ def _latest_course_document(conn, course_id: int):
     )
 
 
+def _course_documents(conn, course_id: int, limit: int = 50) -> List[Dict[str, Any]]:
+    rows = _fetchall(
+        conn,
+        """
+        SELECT *
+        FROM course_documents
+        WHERE course_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT ?
+        """,
+        (course_id, limit),
+    )
+    return [dict(row) for row in rows]
+
+
+def _course_corpus_text(
+    conn,
+    course_id: int,
+    max_docs: int = 12,
+    max_chars: int = 120000,
+    max_chars_per_doc: int = 14000,
+) -> str:
+    documents = _course_documents(conn, course_id, limit=max_docs)
+    if not documents:
+        return ""
+
+    chunks: List[str] = []
+    used_chars = 0
+    for idx, doc in enumerate(documents, start=1):
+        filename = str(doc.get("filename", f"document_{idx}"))
+        raw_text = str(doc.get("raw_text", "") or "").strip()
+        if not raw_text:
+            continue
+
+        limited = raw_text[:max_chars_per_doc]
+        section = f"[Source {idx}: {filename}]\n{limited}"
+        section_len = len(section)
+        if used_chars + section_len > max_chars and chunks:
+            break
+        chunks.append(section)
+        used_chars += section_len
+
+    return "\n\n".join(chunks).strip()
+
+
 def _ensure_enrolled(conn, user_id: int, course_id: int) -> None:
     _execute(
         conn,
@@ -878,7 +923,7 @@ def _build_workflow(document: Any, skill_map: List[Dict[str, Any]], questions: L
     improvement = min(100.0, round(6 + (approved / max(1, total_questions)) * 38 + min(validated, 10) * 3.3, 1))
 
     steps = [
-        {"number": 1, "title": "Upload Course Doc", "status": step1},
+        {"number": 1, "title": "Upload Course Docs", "status": step1},
         {"number": 2, "title": "Generate Skill Map", "status": step2},
         {"number": 3, "title": "Validate", "status": step3},
         {"number": 4, "title": "Generate Quiz Bank", "status": step4},
@@ -1310,6 +1355,7 @@ def professor_course(request: Request, course_id: int):
             return RedirectResponse("/prof", status_code=303)
 
         document = _latest_course_document(conn, course_id)
+        documents = _course_documents(conn, course_id)
         skill_rows = _fetchall(
             conn,
             "SELECT * FROM skill_map WHERE course_id = ? ORDER BY id ASC",
@@ -1383,6 +1429,7 @@ def professor_course(request: Request, course_id: int):
             request,
             course=course,
             document=document,
+            documents=documents,
             skill_map=skill_map,
             questions=questions,
             risk_flags=risk_flags,
@@ -1398,7 +1445,7 @@ def professor_course(request: Request, course_id: int):
 
 
 @app.post("/prof/course/{course_id}/upload-doc")
-async def upload_document(request: Request, course_id: int, file: UploadFile = File(...)):
+async def upload_document(request: Request, course_id: int, files: List[UploadFile] = File(...)):
     redirect = _require_auth(request, role="professor")
     if redirect:
         return redirect
@@ -1414,24 +1461,29 @@ async def upload_document(request: Request, course_id: int, file: UploadFile = F
         if not owned:
             return RedirectResponse("/prof", status_code=303)
 
-        raw_bytes = await file.read()
-        filename = file.filename or "uploaded_document"
-        if filename.lower().endswith(".pdf"):
-            raw_text = extract_text_from_pdf_bytes(raw_bytes)
-        else:
-            raw_text = raw_bytes.decode("utf-8", errors="ignore")
+        uploaded = [item for item in files if item and (item.filename or "").strip()]
+        if not uploaded:
+            return RedirectResponse(f"/prof/course/{course_id}", status_code=303)
 
-        if not raw_text.strip():
-            raw_text = "Uploaded file did not contain extractable text."
+        for file in uploaded:
+            raw_bytes = await file.read()
+            filename = file.filename or "uploaded_document"
+            if filename.lower().endswith(".pdf"):
+                raw_text = extract_text_from_pdf_bytes(raw_bytes)
+            else:
+                raw_text = raw_bytes.decode("utf-8", errors="ignore")
 
-        _execute(
-            conn,
-            """
-            INSERT INTO course_documents (course_id, filename, raw_text)
-            VALUES (?, ?, ?)
-            """,
-            (course_id, filename, raw_text),
-        )
+            if not raw_text.strip():
+                raw_text = "Uploaded file did not contain extractable text."
+
+            _execute(
+                conn,
+                """
+                INSERT INTO course_documents (course_id, filename, raw_text)
+                VALUES (?, ?, ?)
+                """,
+                (course_id, filename, raw_text),
+            )
 
         # Recompute dependent artifacts after document updates.
         _execute(conn, "DELETE FROM skill_map WHERE course_id = ?", (course_id,))
@@ -1440,6 +1492,38 @@ async def upload_document(request: Request, course_id: int, file: UploadFile = F
         conn.close()
 
     return RedirectResponse(f"/prof/course/{course_id}?toast=doc_uploaded", status_code=303)
+
+
+@app.post("/prof/course/{course_id}/document/{document_id}/delete")
+def delete_document(request: Request, course_id: int, document_id: int):
+    redirect = _require_auth(request, role="professor")
+    if redirect:
+        return redirect
+
+    user = _current_user(request)
+    conn = get_connection()
+    try:
+        owned = _fetchone(
+            conn,
+            "SELECT id FROM courses WHERE id = ? AND professor_id = ?",
+            (course_id, user["id"]),
+        )
+        if not owned:
+            return RedirectResponse("/prof", status_code=303)
+
+        _execute(
+            conn,
+            "DELETE FROM course_documents WHERE id = ? AND course_id = ?",
+            (document_id, course_id),
+        )
+
+        # Source corpus changed, force regeneration of dependent artifacts.
+        _execute(conn, "DELETE FROM skill_map WHERE course_id = ?", (course_id,))
+        _execute(conn, "DELETE FROM quiz_questions WHERE course_id = ?", (course_id,))
+    finally:
+        conn.close()
+
+    return RedirectResponse(f"/prof/course/{course_id}?toast=doc_removed", status_code=303)
 
 
 @app.post("/prof/course/{course_id}/generate-skill-map")
@@ -1459,11 +1543,11 @@ def generate_skill_map(request: Request, course_id: int):
         if not owned:
             return RedirectResponse("/prof", status_code=303)
 
-        document = _latest_course_document(conn, course_id)
-        if not document:
+        source_text = _course_corpus_text(conn, course_id)
+        if not source_text:
             return RedirectResponse(f"/prof/course/{course_id}", status_code=303)
 
-        skill_nodes = llm_service.generate_skill_map(document["raw_text"], max_topics=10)
+        skill_nodes = llm_service.generate_skill_map(source_text, max_topics=10)
         _execute(conn, "DELETE FROM skill_map WHERE course_id = ?", (course_id,))
         for node in skill_nodes:
             _execute(
@@ -1614,8 +1698,8 @@ def generate_quiz_bank(
         if not owned:
             return RedirectResponse("/prof", status_code=303)
 
-        document = _latest_course_document(conn, course_id)
-        if not document:
+        source_text = _course_corpus_text(conn, course_id)
+        if not source_text:
             return RedirectResponse(f"/prof/course/{course_id}", status_code=303)
 
         validated_rows = _fetchall(
@@ -1637,7 +1721,7 @@ def generate_quiz_bank(
             topics = base_topics
 
         generated = llm_service.generate_quiz(
-            document["raw_text"],
+            source_text,
             topics,
             num_questions=max(3, min(count, 20)),
             difficulty=difficulty,
@@ -2620,6 +2704,7 @@ def student_learning_tools(request: Request, course_id: int):
 
         _ensure_enrolled(conn, user["id"], course_id)
         document = _latest_course_document(conn, course_id)
+        source_text = _course_corpus_text(conn, course_id)
         tutor_messages = _load_tutor_messages(conn, user["id"], course_id, limit=40)
     finally:
         conn.close()
@@ -2678,7 +2763,6 @@ def student_learning_generate(
     if not document:
         error = "Course document is missing. Ask professor to upload course material first."
     else:
-        source_text = document["raw_text"]
         if action == "summary":
             generated_content = llm_service.generate_course_summary(source_text, focus_topic=focus_topic)
         elif action == "relearn":
@@ -2736,8 +2820,8 @@ def tutor_ask(
 
         _ensure_enrolled(conn, user["id"], course_id)
 
-        document = _latest_course_document(conn, course_id)
-        chunks = split_into_chunks(document["raw_text"] if document else "")
+        source_text = _course_corpus_text(conn, course_id)
+        chunks = split_into_chunks(source_text)
         retriever = LexicalRetriever(chunks)
         retrieved = retriever.search(question, top_k=3)
 

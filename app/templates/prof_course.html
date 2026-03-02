@@ -44,11 +44,23 @@
 
       {% if step.number == 1 %}
       <form method="post" action="/prof/course/{{ course.id }}/upload-doc" enctype="multipart/form-data" class="step-form" id="upload-form">
-        <input type="file" name="file" accept=".pdf,.txt,.md" required />
-        <button type="submit">Upload Course Doc</button>
+        <input id="course-doc-input" type="file" name="files" accept=".pdf" multiple required />
+        <div id="selected-doc-list" class="doc-chip-list"></div>
+        <p id="selected-doc-empty" class="muted small">Select one or more PDFs, remove any with X, then click Upload.</p>
+        <button type="submit">Upload Selected PDFs</button>
       </form>
-      {% if document %}
-      <p class="muted small">Current doc: <strong>{{ document.filename }}</strong></p>
+      {% if documents %}
+      <p class="muted small">Uploaded docs: <strong>{{ documents|length }}</strong></p>
+      <div class="uploaded-doc-list">
+        {% for doc in documents %}
+        <div class="uploaded-doc-item">
+          <span class="uploaded-doc-name">{{ doc.filename }}</span>
+          <form method="post" action="/prof/course/{{ course.id }}/document/{{ doc.id }}/delete" class="inline-delete-form">
+            <button type="submit" class="doc-remove-btn" title="Remove PDF">X</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
       {% else %}
       <p class="muted small">No document uploaded yet.</p>
       {% endif %}
@@ -111,10 +123,18 @@
     {% endfor %}
   </div>
 
-  {% if document %}
+  {% if documents %}
   <details class="doc-preview-wrap">
-    <summary>Preview Uploaded Document</summary>
-    <pre class="doc-preview">{{ document.raw_text[:2400] }}</pre>
+    <summary>Preview Uploaded Documents ({{ documents|length }})</summary>
+    {% for doc in documents %}
+    <div class="doc-preview-head">
+      <p class="muted small"><strong>{{ loop.index }}.</strong> {{ doc.filename }}</p>
+      <form method="post" action="/prof/course/{{ course.id }}/document/{{ doc.id }}/delete" class="inline-delete-form">
+        <button type="submit" class="doc-remove-btn" title="Remove PDF">X</button>
+      </form>
+    </div>
+    <pre class="doc-preview">{{ doc.raw_text[:1200] }}</pre>
+    {% endfor %}
   </details>
   {% endif %}
 </section>

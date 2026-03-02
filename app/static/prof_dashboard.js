@@ -578,7 +578,8 @@
     const flags = JSON.parse(flagsEl.textContent || "{}");
     const map = {
       course_created: "Course created. Upload a document to begin workflow.",
-      doc_uploaded: "Course document uploaded successfully.",
+      doc_uploaded: "Course PDFs uploaded successfully.",
+      doc_removed: "Course PDF removed. Regenerate skill map and quiz bank.",
       skill_map_generated: "AI generated skill map from your course document.",
       skill_map_saved: "All skill-map changes saved.",
       quiz_generated: `Quiz bank generated. Estimated improvement +${flags.improvement || "0"}%`,
@@ -607,6 +608,76 @@
     });
   }
 
+  function setupDocumentUploader() {
+    const form = $("#upload-form");
+    const input = $("#course-doc-input");
+    const list = $("#selected-doc-list");
+    const empty = $("#selected-doc-empty");
+    if (!form || !input || !list || !empty) return;
+
+    let selectedFiles = [];
+
+    const fileKey = (file) => `${file.name}::${file.size}::${file.lastModified}`;
+
+    const syncInputFiles = () => {
+      if (typeof DataTransfer === "undefined") return;
+      const transfer = new DataTransfer();
+      selectedFiles.forEach((file) => transfer.items.add(file));
+      input.files = transfer.files;
+    };
+
+    const renderSelected = () => {
+      list.innerHTML = "";
+      if (!selectedFiles.length) {
+        empty.classList.remove("hidden");
+        return;
+      }
+      empty.classList.add("hidden");
+      selectedFiles.forEach((file, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "doc-chip";
+        chip.innerHTML = `<span>${file.name}</span>`;
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "doc-remove-btn";
+        remove.textContent = "X";
+        remove.title = "Remove file";
+        remove.addEventListener("click", () => {
+          selectedFiles.splice(idx, 1);
+          syncInputFiles();
+          renderSelected();
+        });
+
+        chip.appendChild(remove);
+        list.appendChild(chip);
+      });
+    };
+
+    input.addEventListener("change", () => {
+      const incoming = Array.from(input.files || []);
+      const existing = new Set(selectedFiles.map(fileKey));
+      incoming.forEach((file) => {
+        const key = fileKey(file);
+        if (!existing.has(key)) {
+          selectedFiles.push(file);
+          existing.add(key);
+        }
+      });
+      syncInputFiles();
+      renderSelected();
+    });
+
+    form.addEventListener("submit", (event) => {
+      if (!selectedFiles.length) {
+        event.preventDefault();
+        showToast("Select at least one PDF before upload.");
+      }
+    });
+
+    renderSelected();
+  }
+
   function init() {
     setupSlider();
     setupCoverageSelection();
@@ -619,6 +690,7 @@
     setupGradingDecisionForms();
     setupToastsAndPulse();
     setupButtonPressFx();
+    setupDocumentUploader();
   }
 
   if (document.readyState === "loading") {
