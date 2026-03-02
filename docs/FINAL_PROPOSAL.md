@@ -1,7 +1,7 @@
 # ReLearnAI Final Proposal (Short Version)
 
 ## Title
-**ReLearnAI: Human-Governed Adaptive Learning Loop for One Course**
+**ReLearnAI: Human-Governed Adaptive Learning Loop **
 
 ## Problem
 Students generate lots of interaction data, but still lack clear, trustworthy guidance on what to study next. Most AI tutors answer questions but do not track evolving mastery over time.
