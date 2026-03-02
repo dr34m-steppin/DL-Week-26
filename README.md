@@ -90,11 +90,13 @@ Loop Repeats with Refined Understanding
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Local Run
+
+#### Prerequisites
 - Python 3.11 or 3.12
 - Optional: `OPENAI_API_KEY` or Azure OpenAI credentials (falls back to mock if not set)
 
-### Installation
+#### Installation
 
 ```bash
 # Clone or navigate to repo
@@ -103,10 +105,10 @@ cd DL-Week-26
 # Create virtual environment
 python -m venv .venv
 
-#if script policy issue run this
+# If PowerShell script policy blocks activation, run this first
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-# Activate (Windows)
+# Activate (Windows PowerShell)
 .\.venv\Scripts\Activate.ps1
 # Or on macOS/Linux:
 # source .venv/bin/activate
@@ -115,23 +117,21 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 pip install -r requirements.txt
 ```
 
-### Run the Application
+If you hit a `psycopg2-binary` build error on newer Python versions, use Python 3.11/3.12.
+
+#### Run the Application
 
 ```bash
-# Start the FastAPI server
 uvicorn app.main:app --reload --port 8000
-
-Keep this terminal running while using the app.
-
-# Open in browser
-# http://127.0.0.1:8000
-
-Press Ctrl + C in the terminal to stop the server.
 ```
 
+Keep this terminal running while using the app.
+Open `http://127.0.0.1:8000` in your browser.
+Press `Ctrl + C` in the terminal to stop the server.
+
 The web UI will launch with:
-1. **Student Interface**: Register → Upload/select course → Take quiz → Chat with tutor → View progress
-2. **Professor Interface**: Login → Review skill map → Approve items → Audit grades → Override decisions
+1. **Student Interface**: Register -> Upload/select course -> Take quiz -> Chat with tutor -> View progress
+2. **Professor Interface**: Login -> Review skill map -> Approve items -> Audit grades -> Override decisions
 
 ---
 
