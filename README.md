@@ -252,12 +252,3 @@ A: No. ReLearnAI continuously models *evolving* mastery over time and recommends
 | **Microsoft Alignment** | Responsible AI principles baked in; actionable guidance; human agency paramount |
 
 ---
-
-## 🚦 Next Steps
-
-1. **Read** [JUDGING_ALIGNMENT.md](docs/JUDGING_ALIGNMENT.md) for detailed rubric mapping
-2. **Run** the app locally: `uvicorn app.main:app --reload --port 8000`
-3. **Follow** [STEP_BY_STEP_BEGINNER.md](docs/STEP_BY_STEP_BEGINNER.md) for the full demo workflow
-4. **Review** [testbench/SETUP_AND_RUN.md](testbench/SETUP_AND_RUN.md) to see test scenarios
-
----
