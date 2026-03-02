@@ -1,175 +1,498 @@
 %PDF-1.4
+%‚„œ”
 1 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+<< /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Length 2111 >>
-stream
-BT
-/F1 11 Tf
-50 782 Td
-(# ReLearnAI Project Documentation) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 1. Problem and Motivation) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (Students produce rich interaction data but still lack a clear answer to: *what should I do) Tj
-0 -14 Td (next?* Existing tools answer questions but rarely maintain an evolving, explainable learning) Tj
-0 -14 Td (state over time.) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 2. Proposed Solution) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (ReLearnAI is an AI-assisted learning loop for one course:) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (1. Ingest course material) Tj
-0 -14 Td (2. Build skill map + prerequisites) Tj
-0 -14 Td (3. Generate diagnostic quiz) Tj
-0 -14 Td (4. Auto-grade and update learning state) Tj
-0 -14 Td (5. Recommend next action) Tj
-0 -14 Td (6. Keep professor in control for validation and overrides) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 3. System Design) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (### 3.1 Components) Tj
-0 -14 Td (- **Course Knowledge Base**: uploaded course document stored as text) Tj
-0 -14 Td (- **Retriever \(RAG-lite\)**: lexical chunk retrieval with citation references) Tj
-0 -14 Td (- **Quiz Generator**: configurable LLM provider \(Azure/OpenAI/HF/mock\)) Tj
-0 -14 Td (- **Mastery Engine**: topic-level mastery + struggle + risk computation) Tj
-0 -14 Td (- **SnapScore**: motivation and consistency score) Tj
-0 -14 Td (- **Professor HITL Layer**:) Tj
-0 -14 Td (- skill map validation) Tj
-0 -14 Td (- quiz approval/editing) Tj
-0 -14 Td (- risk flag overrides) Tj
-0 -14 Td (- grade confirmation/override) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (### 3.2 Data Model) Tj
-0 -14 Td (Core entities:) Tj
-0 -14 Td (- users) Tj
-0 -14 Td (- courses) Tj
-0 -14 Td (- course_documents) Tj
-0 -14 Td (- skill_map) Tj
-0 -14 Td (- quiz_questions) Tj
-0 -14 Td (- quiz_attempts) Tj
-0 -14 Td (- student_topic_state) Tj
-0 -14 Td (- snapscore_events) Tj
-0 -14 Td (- risk_flags) Tj
-0 -14 Td (- grading_reviews) Tj
-0 -14 Td (- chat_messages) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 4. Learning-State Modeling) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (Per topic:) Tj
-0 -14 Td (- `mastery = \(correct + 1\) / \(attempts + 2\)`) Tj
-ET
-endstream
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R] /Count 4 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 8 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 4 0 obj
-<< /Length 2413 >>
-stream
-BT
-/F1 11 Tf
-50 782 Td
-(- `struggle = weighted\(low mastery, response latency, wrong streak\)`) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (Risk policy:) Tj
-0 -14 Td (- LOW: insufficient data or healthy trajectory) Tj
-0 -14 Td (- MEDIUM: moderate mastery/struggle concern) Tj
-0 -14 Td (- HIGH: persistently low mastery with enough attempts) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (This makes progression explainable and deterministic.) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 5. Human-in-the-Loop Controls) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (Professor controls are explicit and auditable:) Tj
-0 -14 Td (- Validate/edit skill map topics and prerequisites) Tj
-0 -14 Td (- Approve/edit each AI-generated quiz question) Tj
-0 -14 Td (- Override risk flags with status + rationale) Tj
-0 -14 Td (- Confirm or override AI grade recommendation) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (This satisfies agency and trust requirements in education.) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 6. Responsible AI Considerations) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (- **Explainability**: citations in tutor responses and visible score formulas) Tj
-0 -14 Td (- **Consistency**: deterministic fallback mode \(`mock`\) for reproducible runs) Tj
-0 -14 Td (- **Bias mitigation**: professor review gates for all high-impact outputs) Tj
-0 -14 Td (- **Privacy**: minimal local storage, no unnecessary personal data) Tj
-0 -14 Td (- **Human agency**: override mechanisms throughout grading/risk flows) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 7. Implementation Completeness \(MVP\)) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (Implemented:) Tj
-0 -14 Td (- auth + role separation) Tj
-0 -14 Td (- upload 1 document) Tj
-0 -14 Td (- chat with citations) Tj
-0 -14 Td (- quiz generation) Tj
-0 -14 Td (- auto grading) Tj
-0 -14 Td (- evolving score updates) Tj
-0 -14 Td (- student dashboard) Tj
-0 -14 Td (- professor dashboard with HITL controls) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 8. Limitations) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (- Current retriever is lexical, not embedding-based) Tj
-0 -14 Td (- Single-instance SQLite \(not production scale\)) Tj
-0 -14 Td (- No full LMS sync in MVP \(Canvas integration planned\)) Tj
-0 -14 Td (- Skill graph is relationally represented \(Neo4j is next phase\)) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 9. Future Work) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (- Canvas API sync for assignments and gradebook) Tj
-0 -14 Td (- Azure AI Search embedding retrieval) Tj
-0 -14 Td (- Neo4j concept graph for richer prerequisite paths) Tj
-ET
-endstream
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
 endobj
 5 0 obj
-<< /Type /Page /Parent 8 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
-endobj
-6 0 obj
-<< /Length 377 >>
+<< /Length 2556 >>
 stream
 BT
-/F1 11 Tf
-50 782 Td
-(- longitudinal drift detection across semesters) Tj
-0 -14 Td (- cohort fairness analytics) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (## 10. Reproducibility) Tj
-0 -14 Td ( ) Tj
-0 -14 Td (All setup and test steps are in:) Tj
-0 -14 Td (- `README.md`) Tj
-0 -14 Td (- `testbench/SETUP_AND_RUN.md`) Tj
-0 -14 Td (- `testbench/SMOKE_TEST_CHECKLIST.md`) Tj
-0 -14 Td ( ) Tj
+/F1 10 Tf
+50 760 Td
+13 TL
+(RELEARNAI PROJECT DOCUMENTATION) Tj
+T*
+() Tj
+T*
+(1. Executive Summary) Tj
+T*
+(ReLearnAI is a global collaborative learning platform that unifies:) Tj
+T*
+(- adaptive learning for students) Tj
+T*
+(- governance and quality control for professors) Tj
+T*
+(- upskilling and contribution pathways for working professionals) Tj
+T*
+() Tj
+T*
+(The system combines learning-state modeling, contribution verification, and domain reputation) Tj
+T*
+(ranking in one product.) Tj
+T*
+() Tj
+T*
+(2. Problem Statement) Tj
+T*
+(Learning systems capture abundant interaction data but still fail to deliver trustworthy,) Tj
+T*
+(actionable next-step guidance.) Tj
+T*
+() Tj
+T*
+(Three persistent gaps:) Tj
+T*
+(- learners cannot clearly prioritize what to study next) Tj
+T*
+(- educators cannot trust ungoverned AI outputs for high-stakes decisions) Tj
+T*
+(- professional knowledge contributions are disconnected from structured learning pathways) Tj
+T*
+() Tj
+T*
+(3. Product Vision and Scope) Tj
+T*
+() Tj
+T*
+(- 3.1 Long-Term Vision) Tj
+T*
+(A Learning + Contribution + Verification + Reputation ecosystem where:) Tj
+T*
+(- users continuously learn and upskill) Tj
+T*
+(- projects/publications become learnable pathways) Tj
+T*
+(- contributions are verified by AI + humans) Tj
+T*
+(- expertise is ranked by domain and impact) Tj
+T*
+() Tj
+T*
+(- 3.2 Implemented Scope in Current Build) Tj
+T*
+(Implemented features include:) Tj
+T*
+(- role-based authentication and account/profile settings) Tj
+T*
+(- multi-document course ingestion \(PDF/TXT\)) Tj
+T*
+(- AI skill map generation with prerequisite suggestions) Tj
+T*
+(- professor validation/editing of skill map) Tj
+T*
+(- AI quiz bank generation and professor approval/editing) Tj
+T*
+(- student diagnostic and targeted quiz flows) Tj
+T*
+(- mastery/risk/grading/SnapScore updates per attempt) Tj
+T*
+(- grounded tutor flow with citation support) Tj
+T*
+(- learning tools: summary, relearn concept, solved examples) Tj
+T*
+(- AI learning journey generation and checkpoint tracking) Tj
+T*
+(- final project draft generation and report upload) Tj
+T*
+(- contribution/publication submission) Tj
+T*
+(- AI pre-verification + human review) Tj
+T*
+(- publication outline generation and optional conversion to course) Tj
+T*
+(- discovery via Explore \(search/filter/sort\)) Tj
+T*
+(- domain/global leaderboard ranking) Tj
+T*
+(- platform-wide notifications and tech update broadcasts) Tj
+T*
+() Tj
+T*
+(4. Users and Role Behavior) Tj
+T*
+() Tj
+T*
+(- 4.1 Student) Tj
+T*
+(- enrolls in courses) Tj
+T*
+(- completes adaptive quiz loops) Tj
+T*
 ET
 endstream
 endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
 7 0 obj
-<< /Type /Page /Parent 8 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+<< /Length 1841 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+13 TL
+(- receives next-step recommendations) Tj
+T*
+(- uses tutor and learning tools) Tj
+T*
+() Tj
+T*
+(- 4.2 Professor) Tj
+T*
+(- uploads course knowledge) Tj
+T*
+(- validates curriculum structure) Tj
+T*
+(- approves assessments) Tj
+T*
+(- governs risk and grading overrides) Tj
+T*
+(- verifies contributions) Tj
+T*
+() Tj
+T*
+(- 4.3 Working Professional \(Profile-Based\)) Tj
+T*
+(- configures professional profile in settings/interests) Tj
+T*
+(- creates domain journeys from goals) Tj
+T*
+(- submits project/publication contributions) Tj
+T*
+(- participates in verification and reputation loop) Tj
+T*
+() Tj
+T*
+(5. System Architecture) Tj
+T*
+() Tj
+T*
+(- 5.1 Application Layer) Tj
+T*
+(- FastAPI backend) Tj
+T*
+(- Jinja template frontend) Tj
+T*
+(- session-based authentication and role access controls) Tj
+T*
+() Tj
+T*
+(- 5.2 AI Layer) Tj
+T*
+(Supported providers:) Tj
+T*
+(- OpenAI) Tj
+T*
+(- Azure OpenAI) Tj
+T*
+(- Hugging Face) Tj
+T*
+(- Mock fallback) Tj
+T*
+() Tj
+T*
+(AI tasks:) Tj
+T*
+(- skill map generation) Tj
+T*
+(- quiz generation) Tj
+T*
+(- tutor response generation) Tj
+T*
+(- learning content generation \(summary/relearn/examples\)) Tj
+T*
+(- journey generation) Tj
+T*
+(- contribution pre-verification scoring) Tj
+T*
+() Tj
+T*
+(- 5.3 Retrieval Layer) Tj
+T*
+(- document chunking) Tj
+T*
+(- lexical retrieval over uploaded material) Tj
+T*
+(- tutor and quiz context grounding) Tj
+T*
+(- citation metadata persistence in chat flow) Tj
+T*
+(- optional online context augmentation via env settings) Tj
+T*
+() Tj
+T*
+(- 5.4 Data Layer) Tj
+T*
+(- local mode: SQLite) Tj
+T*
+(- deployed mode: Postgres \(DATABASE_URL\)) Tj
+T*
+(- recommended deployment: Render + Postgres for persistent multi-user operation) Tj
+T*
+() Tj
+T*
+(6. Core Modeling and Algorithms) Tj
+T*
+() Tj
+T*
+(- 6.1 Learning-State Tracking) Tj
+T*
+(Per-topic state tracks:) Tj
+T*
+ET
+endstream
 endobj
 8 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
 endobj
 9 0 obj
-<< /Type /Catalog /Pages 8 0 R >>
+<< /Length 2093 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+13 TL
+(- attempts) Tj
+T*
+(- correctness) Tj
+T*
+(- response latency) Tj
+T*
+(- wrong streak patterns) Tj
+T*
+() Tj
+T*
+(Mastery and struggle scores are updated after each quiz attempt.) Tj
+T*
+() Tj
+T*
+(- 6.2 Risk and Grade Logic) Tj
+T*
+(- risk flags are generated from topic trend behavior) Tj
+T*
+(- grading recommendations are produced from attempt outcomes) Tj
+T*
+(- professor review can confirm or override final decision) Tj
+T*
+() Tj
+T*
+(- 6.3 SnapScore and Reputation) Tj
+T*
+(SnapScore combines learning and contribution indicators, including:) Tj
+T*
+(- mastery and quiz quality) Tj
+T*
+(- engagement and improvement behavior) Tj
+T*
+(- project/contribution outcomes) Tj
+T*
+(- originality and impact signals) Tj
+T*
+() Tj
+T*
+(Leaderboard supports domain-focused and global ranking contexts.) Tj
+T*
+() Tj
+T*
+(- 6.4 Contribution Verification Rule) Tj
+T*
+(AI pre-verification computes:) Tj
+T*
+(- similarity percentage) Tj
+T*
+(- novelty estimate) Tj
+T*
+(- factual confidence estimate) Tj
+T*
+() Tj
+T*
+(Current threshold behavior:) Tj
+T*
+(- similarity > 40% -> flagged for review) Tj
+T*
+() Tj
+T*
+(Final acceptance/rejection requires human decision.) Tj
+T*
+() Tj
+T*
+(7. End-to-End Platform Workflows) Tj
+T*
+() Tj
+T*
+(- 7.1 Course Intelligence Workflow) Tj
+T*
+(- Professor creates course and uploads docs) Tj
+T*
+(- AI creates skill map and quiz bank) Tj
+T*
+(- Professor validates and approves) Tj
+T*
+(- Student completes adaptive quiz loop) Tj
+T*
+(- System updates mastery/risk/grading/SnapScore) Tj
+T*
+(- Professor governs high-impact overrides) Tj
+T*
+() Tj
+T*
+(- 7.2 Journey Workflow) Tj
+T*
+(- User submits domain goal) Tj
+T*
+(- AI creates journey modules/milestones/checkpoints) Tj
+T*
+(- User advances checkpoints) Tj
+T*
+(- Final project and report flow connects to contribution system) Tj
+T*
+() Tj
+T*
+(- 7.3 Contribution Workflow) Tj
+T*
+(- User submits contribution/publication) Tj
+T*
+(- AI pre-verification runs) Tj
+T*
+(- human review finalizes decision) Tj
+T*
+(- publication can become learning outline/course) Tj
+T*
+(- reputation signals update leaderboard impact) Tj
+T*
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 1829 >>
+stream
+BT
+/F1 10 Tf
+50 760 Td
+13 TL
+() Tj
+T*
+(- 7.4 Knowledge Update Workflow) Tj
+T*
+(- User publishes tech update) Tj
+T*
+(- notification broadcast reaches all users) Tj
+T*
+(- updates appear in inbox and discovery feed) Tj
+T*
+() Tj
+T*
+(8. Human-in-the-Loop Design) Tj
+T*
+(Human checkpoints implemented in production code:) Tj
+T*
+(- skill map validation/editing) Tj
+T*
+(- quiz question approval/editing) Tj
+T*
+(- risk override) Tj
+T*
+(- grade finalization) Tj
+T*
+(- contribution verification) Tj
+T*
+() Tj
+T*
+(These controls preserve accountability for educational decisions.) Tj
+T*
+() Tj
+T*
+(9. Responsible AI) Tj
+T*
+(- Explainability via grounded context and citation surfaces) Tj
+T*
+(- Deterministic fallback \(mock\) for reproducibility) Tj
+T*
+(- Human authority over consequential decisions) Tj
+T*
+(- role-based access and limited data collection) Tj
+T*
+(- explicit separation of implemented scope vs roadmap) Tj
+T*
+() Tj
+T*
+(10. Deployment and Operations) Tj
+T*
+(Recommended hackathon deployment:) Tj
+T*
+(- Render web service) Tj
+T*
+(- Postgres database) Tj
+T*
+(- API keys in environment variables only) Tj
+T*
+() Tj
+T*
+(Operational outcomes:) Tj
+T*
+(- persistent data across redeploys) Tj
+T*
+(- multi-user shared testing by judges and teammates) Tj
+T*
+(- secret-safe architecture \(no keys in repo\)) Tj
+T*
+() Tj
+T*
+(11. Limitations \(Current\)) Tj
+T*
+(Not fully implemented yet:) Tj
+T*
+(- Canvas LMS integration) Tj
+T*
+(- vector retrieval index \(Azure AI Search\)) Tj
+T*
+(- Neo4j graph reasoning layer) Tj
+T*
+(- autonomous external research ingestion) Tj
+T*
+() Tj
+T*
+(12. Planned Evolution) Tj
+T*
+(- vector + graph hybrid knowledge stack) Tj
+T*
+(- LMS sync and institutional workflows) Tj
+T*
+(- stronger verification governance and audit trails) Tj
+T*
+(- longitudinal fairness and drift monitoring for education contexts) Tj
+T*
+ET
+endstream
 endobj
 xref
-0 10
+0 12
 0000000000 65535 f 
-0000000009 00000 n 
-0000000079 00000 n 
-0000002242 00000 n 
-0000002368 00000 n 
-0000004833 00000 n 
-0000004959 00000 n 
-0000005387 00000 n 
-0000005513 00000 n 
-0000005582 00000 n 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000140 00000 n 
+0000000210 00000 n 
+0000000336 00000 n 
+0000002944 00000 n 
+0000003070 00000 n 
+0000004963 00000 n 
+0000005089 00000 n 
+0000007234 00000 n 
+0000007362 00000 n 
 trailer
-<< /Size 10 /Root 9 0 R >>
+<< /Size 12 /Root 1 0 R >>
 startxref
-5631
+9244
 %%EOF

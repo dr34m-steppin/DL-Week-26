@@ -1,54 +1,81 @@
-# Deploy ReLearnAI on Render
+# Deploy ReLearnAI on Render (Persistent + Multi-User)
 
-This deploy keeps your OpenAI key private. Do not commit `.env` or any real keys to GitHub.
+This guide deploys a public website where all users share one backend and one database.
 
-## 1) Create Postgres Database
-Preferred for your case: Render Free PostgreSQL trial (1GB, trial period).
+## 1) Create database first (required for persistence)
+Use one of:
+- Render PostgreSQL
+- Supabase PostgreSQL
 
-Option A (Render Postgres):
-1. In Render dashboard, create a PostgreSQL database.
-2. Copy its internal/external connection string URL.
+Copy the full connection URI and replace `[YOUR-PASSWORD]` with the real password.
 
-Option B (Supabase Postgres):
-1. Create a project in Supabase.
-2. Open **Project Settings -> Database**.
-3. Copy connection string (URI), usually transaction pooler.
+## 2) Create Render web service
+1. New Web Service -> connect your GitHub repo
+2. Build command:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Start command:
+   ```bash
+   uvicorn app.main:app --host 0.0.0.0 --port $PORT
+   ```
 
-## 2) Create Web Service
-1. Go to Render dashboard.
-2. Click **New +** -> **Web Service**.
-3. Connect `dr34m-steppin/DL-Week-26`.
-4. Use:
-   - Build command: `pip install -r requirements.txt`
-   - Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+## 3) Set Python version to avoid wheel build issues
+In Render environment/settings, set:
+- `PYTHON_VERSION=3.12.8`
 
-## 3) Set Environment Variables
-Add these in Render -> Environment:
+Reason: some builds fail on Python 3.14 due missing wheels for transitive deps.
 
-- `SECRET_KEY` = long random string
-- `DATABASE_URL` = your Postgres URL (Render or Supabase)
-- `DB_FALLBACK_TO_SQLITE` = `1` (optional fail-safe so app still boots if DB URL is broken)
-- `LLM_PROVIDER` = `openai`
-- `OPENAI_API_KEY` = your real key
-- `OPENAI_MODEL` = `gpt-4o-mini`
-- `ENABLE_ONLINE_CONTEXT` = `1`
-- `ONLINE_CONTEXT_MAX_TOPICS` = `4`
-- `ONLINE_CONTEXT_CHARS_PER_TOPIC` = `550`
+## 4) Environment variables
+Set these in Render:
 
-## 4) Deploy and Share
-1. Click **Deploy**.
-2. Open generated public URL.
-3. Share URL with teammates and judges.
+```env
+SECRET_KEY=<long-random-string>
+DATABASE_URL=<postgres-uri-with-real-password>
+DB_FALLBACK_TO_SQLITE=0
 
-## 5) Why data now persists
-- App uses `DATABASE_URL` when provided.
-- All users, courses, leaderboard, quiz history are stored in Supabase Postgres.
-- Redeploying Render no longer resets data.
-- If Supabase is temporarily unreachable, app can fallback to SQLite when `DB_FALLBACK_TO_SQLITE=1`.
+LLM_PROVIDER=openai
+OPENAI_API_KEY=<your-openai-key>
+OPENAI_MODEL=gpt-4o-mini
 
-If using Render Postgres, replace \"Supabase\" above with \"Render Postgres\"; behavior is the same.
+ENABLE_ONLINE_CONTEXT=1
+ONLINE_CONTEXT_MAX_TOPICS=4
+ONLINE_CONTEXT_CHARS_PER_TOPIC=550
+```
 
-## 6) Safety Checklist
-- Keep login enabled.
-- Set usage limits on your OpenAI account.
-- Rotate keys if you accidentally expose one.
+Notes:
+- `DB_FALLBACK_TO_SQLITE=0` is recommended in production so DB misconfiguration fails loudly.
+- Keep all keys only in Render environment variables, never in git.
+
+## 5) Deploy + verify
+After deploy:
+1. Open `/health`
+2. Register at least 2 accounts
+3. Publish a tech update in `/notifications`
+4. Confirm all accounts receive the update in inbox
+5. Redeploy once and confirm users/data still exist
+
+## 6) Troubleshooting
+
+### Build fails on `pydantic-core` / Rust
+- Set `PYTHON_VERSION=3.12.8`
+- Clear build cache and redeploy
+
+### App exits with status 3
+- Ensure start command includes `--host 0.0.0.0 --port $PORT`
+- Check env vars are present and valid
+
+### No data persistence
+- Verify `DATABASE_URL` points to Postgres
+- Confirm password placeholder is replaced
+- Confirm service can connect to DB (same region/network when possible)
+
+### Notification issues
+- Confirm user count on notifications page
+- Publish a new update and check success message recipient count
+
+## 7) Security checklist
+- Do not commit `.env` / `.env.save`
+- Rotate keys if exposed
+- Set OpenAI usage limits
+- Keep app login enabled

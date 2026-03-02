@@ -1,22 +1,70 @@
-# Judging Alignment (Microsoft Track)
+# Judging Alignment Matrix
 
-## 1) Clarity and alignment of solution
-- We target one explicit problem: students lack precise next-step guidance.
-- MVP proves one complete adaptive loop for one course.
+## 1) Clarity and Alignment of Solution
+How we align:
+- The product demonstrates one clear adaptive loop and a broader collaborative platform extension
+- Documentation clearly separates implemented features from roadmap items
 
-## 2) Execution and completeness
-- End-to-end flows implemented for student and professor roles.
-- Includes setup docs, testbench, code, architecture, and demo script.
+Evidence:
+- Course adaptive loop pages
+- Journey and contribution workflows
+- Platform discovery/notification/leaderboard pages
 
-## 3) Impact and risk awareness
-- Students receive data-driven focus actions and trend-based gap visibility.
-- Responsible AI controls: transparent scores, citation grounding, override gates.
+## 2) Execution and Completeness
+How we align:
+- Working full-stack system with role-based workflows and persistent deployment path
+- Supports students, professors, and professional profile-based usage
 
-## 4) Human-in-the-loop integration
-- Professors validate skill map
-- Professors approve/edit quiz bank
-- Professors override risk flags
-- Professors confirm or override grading
+Evidence:
+- `/prof/course/{id}` governance workflow
+- `/student/course/{id}/dashboard` adaptive loop
+- `/journeys`, `/contributions`, `/explore`, `/leaderboard`, `/notifications`
+- testbench setup and smoke validation documents
 
-## 5) Innovation
-- Not just a tutor chat; it models evolving learning state and adapts recommendations over time.
+## 3) Impact and Risk Awareness
+How we align:
+- Learners receive concrete intervention recommendations and mastery deltas
+- High-impact AI decisions are reviewable and overridable by humans
+- Contribution quality checks include similarity thresholds and human verification
+
+Evidence:
+- Risk and grading review panels
+- AI pre-verification metrics on contributions
+- SnapScore component visibility
+
+## 4) Human-in-the-Loop Integration
+How we align:
+- Critical decisions are intentionally human-governed
+- Review actions support rationale capture and auditability
+
+Implemented HITL checkpoints:
+- Skill map validation/editing
+- Quiz question approval/editing
+- Risk override
+- Grade finalization
+- Contribution approval/rejection
+
+## 5) Transparency and Interpretability
+How we align:
+- Tutor outputs are grounded in uploaded content
+- Decision support surfaces confidence/rationale fields
+- Scoring behavior is formula-driven and inspectable
+
+## 6) Creativity and Innovation
+How we align:
+- Goes beyond a tutor bot into a collaborative learning and contribution ecosystem
+- Connects learning progress with verified outputs and domain reputation
+- Converts publications into structured learning outlines and optional courses
+
+## 7) Real-World Applicability
+How we align:
+- Multi-user, persistent deployment model via Render + Postgres
+- Cross-role collaboration between students, professors, and professionals
+- Roadmap supports LMS, vector, and graph extensions
+
+## 8) Responsible AI in Education
+How we align:
+- Explainability and fallback consistency
+- Human agency in consequential decisions
+- Minimal-data storage footprint with role-based access
+- Explicit limitation disclosure to avoid overclaiming

@@ -1,35 +1,50 @@
-# 1-2 Minute Demo Script
+# 1-2 Minute Demo Script (Global Collaborative Vision)
 
-## 0:00 - 0:15 Problem
-"Students have lots of data but still don’t know what to study next. ReLearnAI turns raw attempts into a clear adaptive learning loop."
+## 0:00 - 0:12 Problem
+"Learners generate data, but still do not know what to study next. ReLearnAI turns that into adaptive action while keeping humans in control."
 
-## 0:15 - 0:45 Professor setup
+## 0:12 - 0:35 Professor Governance Flow
 - Login as professor
-- Create course
-- Upload one course document
-- Generate skill map and validate it
+- Create course and upload multiple docs
+- Generate skill map and validate prerequisites
 - Generate quiz bank and approve questions
 
 Narration:
-"This is the first human-in-the-loop checkpoint: professors control skill map and assessment quality."
+"AI drafts content, professors govern quality and curriculum correctness."
 
-## 0:45 - 1:15 Student loop
+## 0:35 - 1:00 Student Adaptive Loop
 - Login as student
-- Enroll and start quiz
-- Submit answers
-- Show dashboard with mastery gaps, risk flags, SnapScore, next actions
-- Ask tutor question and show citation-grounded answer
+- Open dashboard and start diagnostic/targeted quiz
+- Submit answers and show results + mastery delta
+- Ask tutor follow-up using grounded context
 
 Narration:
-"The system diagnoses prerequisite gaps, updates mastery over time, and recommends exactly what to do next."
+"The system diagnoses weakness, updates learning state, and gives precise next actions."
 
-## 1:15 - 1:35 Professor oversight
-- Show risk dashboard
-- Override one risk flag
-- Confirm or override AI grade decision
+## 1:00 - 1:20 Professional + Journey Layer
+- Open settings/interests showing professional profile support
+- Create a learning journey from a domain goal
+- Show milestone/checkpoint structure
 
 Narration:
-"Final high-impact decisions stay with the professor."
+"Students and working professionals both get personalized domain learning journeys."
 
-## 1:35 - 1:50 Close
-"We prove a complete adaptive loop for one course today, with a design that scales to LMS and graph integrations next."
+## 1:20 - 1:40 Contribution + Verification Layer
+- Submit a publication/project contribution
+- Show AI pre-verification metrics
+- Show human review decision
+- Generate learning outline from publication
+
+Narration:
+"Knowledge contributions become verified learning assets for the community."
+
+## 1:40 - 1:55 Platform Intelligence Layer
+- Open Explore + Leaderboard
+- Publish tech update in Notifications
+- Show update broadcast across user inboxes
+
+Narration:
+"This creates a global collaborative ecosystem where learning, contribution, and reputation reinforce each other."
+
+## 1:55 - 2:00 Close
+"ReLearnAI is a working human-governed adaptive platform today, with a clear path to LMS, vector retrieval, and graph intelligence next."

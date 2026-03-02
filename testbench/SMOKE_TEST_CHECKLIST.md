@@ -1,30 +1,50 @@
 # Smoke Test Checklist
 
-## Authentication
-- [ ] User can register as professor
-- [ ] User can register as student
-- [ ] Login/logout works
+## 1) Authentication and role experience
+- [ ] Register/login works for professor
+- [ ] Register/login works for student
+- [ ] Account and settings pages load
+- [ ] Profile can be saved with domains/goals/user type
 
-## Professor Flow
-- [ ] Professor can create course
-- [ ] Professor can upload one document
-- [ ] Skill map can be generated
-- [ ] Skill map row can be validated/edited
-- [ ] Quiz bank can be generated
-- [ ] Questions can be approved/edited
+## 2) Professor governance workflow
+- [ ] Create course
+- [ ] Upload multiple documents
+- [ ] Delete uploaded document
+- [ ] Generate skill map
+- [ ] Validate/edit skill entries
+- [ ] Generate quiz bank
+- [ ] Approve/edit quiz questions
 
-## Student Flow
-- [ ] Student can enroll
-- [ ] Quiz page loads approved questions
-- [ ] Submitting quiz creates score
-- [ ] SnapScore changes after quiz
-- [ ] Dashboard shows topic mastery and recommendations
-- [ ] Tutor chat returns answer with citations
+## 3) Student adaptive learning workflow
+- [ ] Enroll in course
+- [ ] Dashboard loads with adaptive next action state
+- [ ] Diagnostic quiz loads and submits
+- [ ] Targeted quiz path works
+- [ ] Results page shows score + skill impact + recommendations
+- [ ] Tutor chat responds with grounded context/citations
+- [ ] Learning tools generate content (summary/relearn/examples)
 
-## HITL Controls
-- [ ] Professor can override risk flags
-- [ ] Professor can confirm/override grading
+## 4) HITL controls
+- [ ] Risk override action works
+- [ ] Grade confirmation/override works
+- [ ] Decisions persist after refresh
 
-## Responsible AI
-- [ ] Citation references visible in tutor response
-- [ ] Risk/grade decisions remain editable by professor
+## 5) Journey and collaboration workflow
+- [ ] Learning journey generation works
+- [ ] Checkpoint update works
+- [ ] Final project generation works
+- [ ] Report upload works
+- [ ] Contribution/publication submission works
+- [ ] AI pre-verification fields appear
+- [ ] Human review approve/reject works
+- [ ] Publication outline generation works (owner)
+
+## 6) Platform intelligence layer
+- [ ] Explore search/filter/sort works
+- [ ] Leaderboard loads and domain filter changes ranking
+- [ ] Tech update publish works
+- [ ] Notification broadcast reaches all test-user inboxes
+
+## 7) Reliability and persistence
+- [ ] `/health` endpoint returns status
+- [ ] Data persists after service restart/redeploy (with Postgres)
