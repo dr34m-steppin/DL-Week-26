@@ -130,18 +130,11 @@ in notebook form.
 
 | Theme | Why ReLearnAI Shines |
 |------|----------------------|
-| *Innovation & Creativity* | Merges adaptive learning, human-in-loop trust,
-  and a global skill reputation. Not just a quiz app—it's a learning
-  intelligence platform. |
-| *Technical Implementation* | Python backend, Streamlit/REST frontend,
-  modular `src/` library. Uses LLMs, RAG, skill inference; code quality
-  maintained with tests. |
-| *Impact & Viability* | Addresses a pervasive gap in ed‑tech; scalable to
-  courses, professional upskilling, and research publication. |
-| *Presentation & Documentation* | Comprehensive README (this file), demo
-  notebook, proposals, and judge testbench with clear run instructions. |
-| *Microsoft Track* | Provides actionable guidance, explicable reasoning,
-  supports long‑term learning, and puts human agency at the core. |
+| *Innovation & Creativity* | Merges adaptive learning, human-in-loop trust,and a global skill reputation. Not just a quiz app—it's a learning intelligence platform. |
+| *Technical Implementation* | Python backend, Streamlit/REST frontend,modular `src/` library. Uses LLMs, RAG, skill inference; code quality maintained with tests. |
+| *Impact & Viability* | Addresses a pervasive gap in ed‑tech; scalable to courses, professional upskilling, and research publication. |
+| *Presentation & Documentation* | Comprehensive README (this file), demo notebook, proposals, and judge testbench with clear run instructions. |
+| *Microsoft Track* | Provides actionable guidance, explicable reasoning, supports long‑term learning, and puts human agency at the core. |
 
 Responsible AI considerations are baked in:
 - Explanations accompany all recommendations.
