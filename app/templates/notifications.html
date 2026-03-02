@@ -3,7 +3,7 @@
 {% block content %}
 <section class="card">
   <h1>Notifications</h1>
-  <p class="muted">Unread: {{ unread_count }}. Domain updates and verification events arrive here.</p>
+  <p class="muted">Unread: {{ unread_count }}. Active users in current database: {{ total_users }}.</p>
   <form method="post" action="/notifications/read-all">
     <button type="submit">Mark All Read</button>
   </form>
@@ -11,35 +11,38 @@
 
 <section class="card">
   <h2>Publish Technology Update</h2>
-  <p class="muted">Professors and qualified verifiers can publish new technology updates that notify relevant domain users.</p>
+  <p class="muted">Publish an update and broadcast it to every user inbox.</p>
+  {% if publish_feedback %}
+  <p class="{% if publish_feedback.level == 'success' %}success{% else %}error{% endif %}">{{ publish_feedback.message }}</p>
+  {% endif %}
   <form method="post" action="/updates/publish" class="form-grid two-col">
     <div>
       <label>Domain</label>
       <select name="domain">
         {% for d in domains %}
-        <option value="{{ d.slug }}">{{ d.display_name }}</option>
+        <option value="{{ d.slug }}" {% if update_form.domain == d.slug %}selected{% endif %}>{{ d.display_name }}</option>
         {% endfor %}
       </select>
     </div>
     <div>
       <label>Severity</label>
       <select name="severity">
-        <option value="low">Low</option>
-        <option value="medium" selected>Medium</option>
-        <option value="high">High</option>
+        <option value="low" {% if update_form.severity == "low" %}selected{% endif %}>Low</option>
+        <option value="medium" {% if update_form.severity == "medium" %}selected{% endif %}>Medium</option>
+        <option value="high" {% if update_form.severity == "high" %}selected{% endif %}>High</option>
       </select>
     </div>
     <div>
       <label>Title</label>
-      <input type="text" name="title" placeholder="New transformer architecture benchmark" required />
+      <input type="text" name="title" placeholder="New transformer architecture benchmark" value="{{ update_form.title or '' }}" required />
     </div>
     <div>
       <label>Source URL</label>
-      <input type="text" name="source_url" placeholder="https://arxiv.org/..." />
+      <input type="text" name="source_url" placeholder="https://arxiv.org/..." value="{{ update_form.source_url or '' }}" />
     </div>
     <div class="block">
       <label>Summary</label>
-      <textarea name="summary" placeholder="What changed and who should relearn what?" required></textarea>
+      <textarea name="summary" placeholder="What changed and who should relearn what?" required>{{ update_form.summary or '' }}</textarea>
     </div>
     <button type="submit">Publish Update</button>
   </form>

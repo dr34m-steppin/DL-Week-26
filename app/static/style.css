@@ -223,6 +223,51 @@ button:disabled {
   flex-wrap: wrap;
 }
 
+.contribution-list {
+  display: grid;
+  gap: 10px;
+}
+
+.contribution-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.contribution-summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.contribution-summary::-webkit-details-marker {
+  display: none;
+}
+
+.contribution-item[open] .contribution-summary,
+.contribution-summary:hover {
+  background: #f8fafc;
+}
+
+.contribution-summary-main h3 {
+  margin: 0;
+}
+
+.contribution-summary-main p {
+  margin: 4px 0 0;
+}
+
+.contribution-body {
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+}
+
 .mini-form,
 .compact-form {
   display: grid;
@@ -440,6 +485,11 @@ button:disabled {
 
 .error {
   color: var(--danger);
+  font-weight: 700;
+}
+
+.success {
+  color: #166534;
   font-weight: 700;
 }
 

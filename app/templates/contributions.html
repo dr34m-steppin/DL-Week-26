@@ -3,7 +3,7 @@
 {% block content %}
 <section class="card">
   <h1>Projects & Publications</h1>
-  <p class="muted">Publish contributions, run AI pre-verification, collect endorsements, and complete human validation.</p>
+  <p class="muted">Publish contributions, run AI pre-verification, and complete human validation.</p>
   <form method="post" action="/contributions/create" class="form-grid two-col">
     <div>
       <label>Title</label>
@@ -52,77 +52,87 @@
   </form>
 </section>
 
-<section class="grid-2">
-  {% for c in contributions %}
-  <article class="card">
-    <h3>{{ c.title }}</h3>
-    <p class="muted">{{ c.contribution_type }} • {{ c.domain }} • {{ c.owner_name }} • {{ c.visibility }}</p>
-    <p>{{ c.summary }}</p>
-    {% if c.source_url %}<p><a href="{{ c.source_url }}" target="_blank">Open source/reference link</a></p>{% endif %}
-    <p><strong>AI Similarity:</strong> {{ c.ai_similarity }}%</p>
-    <p><strong>AI Novelty:</strong> {{ c.ai_novelty }}%</p>
-    <p><strong>AI Factual Confidence:</strong> {{ c.ai_factual_confidence }}%</p>
-    <p><strong>Status:</strong> {{ c.final_status }} (AI: {{ c.ai_status }}, Human: {{ c.human_status }})</p>
-    <p><strong>SnapScore Awarded:</strong> {{ c.snapscore_awarded }}</p>
-    <p><strong>Endorsements:</strong> {{ c.endorsement_count }} (weight {{ c.endorsement_weight }})</p>
-    <p><strong>Allow Course Conversion:</strong> {% if c.allow_course_conversion == 1 %}Yes{% else %}No{% endif %}</p>
+<section class="card">
+  <h2>Contribution Feed</h2>
+  <p class="muted">Click a title to expand details and actions.</p>
+  <div class="contribution-list">
+    {% for c in contributions %}
+    <details class="contribution-item">
+      <summary class="contribution-summary">
+        <div class="contribution-summary-main">
+          <h3>{{ c.title }}</h3>
+          <p class="muted small">{{ c.contribution_type }} • {{ c.domain }} • {{ c.owner_name }} • {{ c.visibility }}</p>
+        </div>
+        <span class="status-pill {% if c.final_status == 'VERIFIED' %}completed{% elif c.final_status in ['AI_VERIFIED', 'PENDING'] %}in-progress{% else %}pending{% endif %}">
+          {{ c.final_status }}
+        </span>
+      </summary>
 
-    <div class="inline-actions">
-      <form method="post" action="/contributions/{{ c.id }}/endorse">
-        <button type="submit">Endorse</button>
-      </form>
-      {% if c.can_generate_outline %}
-      <form method="post" action="/contributions/{{ c.id }}/generate-outline" class="mini-form">
-        <label><input type="checkbox" name="make_course" value="1" {% if c.allow_course_conversion == 1 %}checked{% endif %} /> Convert to course (if allowed)</label>
-        <button type="submit">Generate Learning Outline</button>
-      </form>
-      {% endif %}
-      {% if c.can_start_learning %}
-      <form method="post" action="/contributions/{{ c.id }}/start-learning">
-        <button type="submit">Start Learning From Outline</button>
-      </form>
-      <a class="button-link" href="/student/course/{{ c.outline_course_id }}/dashboard">Open Generated Course</a>
-      {% endif %}
-      {% if can_verify %}
-      <form method="post" action="/contributions/{{ c.id }}/review" class="mini-form">
-        <label>Reviewer Decision</label>
-        <select name="decision">
-          <option value="APPROVE">Approve</option>
-          <option value="REJECT">Reject</option>
-        </select>
-        <label>Confidence</label>
-        <input type="number" step="0.05" min="0" max="1" name="confidence_score" value="0.8" />
-        <textarea name="notes" placeholder="Validation rationale"></textarea>
-        <button type="submit">Submit Review</button>
-      </form>
-      {% endif %}
-    </div>
+      <div class="contribution-body">
+        <p>{{ c.summary }}</p>
+        {% if c.source_url %}<p><a href="{{ c.source_url }}" target="_blank">Open source/reference link</a></p>{% endif %}
+        <p><strong>AI Similarity:</strong> {{ c.ai_similarity }}%</p>
+        <p><strong>AI Novelty:</strong> {{ c.ai_novelty }}%</p>
+        <p><strong>AI Factual Confidence:</strong> {{ c.ai_factual_confidence }}%</p>
+        <p><strong>Status:</strong> {{ c.final_status }} (AI: {{ c.ai_status }}, Human: {{ c.human_status }})</p>
+        <p><strong>SnapScore Awarded:</strong> {{ c.snapscore_awarded }}</p>
+        <p><strong>Allow Course Conversion:</strong> {% if c.allow_course_conversion == 1 %}Yes{% else %}No{% endif %}</p>
 
-    {% if c.outline_ready %}
-    <details>
-      <summary>AI Learning Outline</summary>
-      <p class="muted tiny"><strong>Goal:</strong> {{ c.outline.get('goal', '') }}</p>
-      {% for module in c.outline.get('modules', []) %}
-      <p class="muted tiny"><strong>{{ module.get('phase', 'Phase') }}</strong>: {{ module.get('items', []) | join(', ') }}</p>
-      {% endfor %}
-      <p class="muted tiny">Generated at: {{ c.outline_generated_at or 'N/A' }}</p>
+        <div class="inline-actions">
+          {% if c.can_generate_outline %}
+          <form method="post" action="/contributions/{{ c.id }}/generate-outline" class="mini-form">
+            <label><input type="checkbox" name="make_course" value="1" {% if c.allow_course_conversion == 1 %}checked{% endif %} /> Convert to course (if allowed)</label>
+            <button type="submit">Generate Learning Outline</button>
+          </form>
+          {% endif %}
+          {% if c.can_start_learning %}
+          <form method="post" action="/contributions/{{ c.id }}/start-learning">
+            <button type="submit">Start Learning From Outline</button>
+          </form>
+          <a class="button-link" href="/student/course/{{ c.outline_course_id }}/dashboard">Open Generated Course</a>
+          {% endif %}
+          {% if can_verify %}
+          <form method="post" action="/contributions/{{ c.id }}/review" class="mini-form">
+            <label>Reviewer Decision</label>
+            <select name="decision">
+              <option value="APPROVE">Approve</option>
+              <option value="REJECT">Reject</option>
+            </select>
+            <label>Confidence</label>
+            <input type="number" step="0.05" min="0" max="1" name="confidence_score" value="0.8" />
+            <textarea name="notes" placeholder="Validation rationale"></textarea>
+            <button type="submit">Submit Review</button>
+          </form>
+          {% endif %}
+        </div>
+
+        {% if c.outline_ready %}
+        <details>
+          <summary>AI Learning Outline</summary>
+          <p class="muted tiny"><strong>Goal:</strong> {{ c.outline.get('goal', '') }}</p>
+          {% for module in c.outline.get('modules', []) %}
+          <p class="muted tiny"><strong>{{ module.get('phase', 'Phase') }}</strong>: {{ module.get('items', []) | join(', ') }}</p>
+          {% endfor %}
+          <p class="muted tiny">Generated at: {{ c.outline_generated_at or 'N/A' }}</p>
+        </details>
+        {% endif %}
+
+        {% if c.reviews %}
+        <details>
+          <summary>Review History</summary>
+          {% for r in c.reviews %}
+          <p class="muted tiny">{{ r.created_at }} • {{ r.reviewer_name }} • {{ r.decision }} • conf {{ r.confidence_score }}</p>
+          <p class="muted tiny">{{ r.notes }}</p>
+          {% endfor %}
+        </details>
+        {% endif %}
+      </div>
     </details>
-    {% endif %}
-
-    {% if c.reviews %}
-    <details>
-      <summary>Review History</summary>
-      {% for r in c.reviews %}
-      <p class="muted tiny">{{ r.created_at }} • {{ r.reviewer_name }} • {{ r.decision }} • conf {{ r.confidence_score }}</p>
-      <p class="muted tiny">{{ r.notes }}</p>
-      {% endfor %}
-    </details>
-    {% endif %}
-  </article>
-  {% else %}
-  <article class="card">
-    <p>No contributions yet.</p>
-  </article>
-  {% endfor %}
+    {% else %}
+    <article class="card">
+      <p>No contributions yet.</p>
+    </article>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}

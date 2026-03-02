@@ -516,22 +516,28 @@ def _notify_user(conn, user_id: int, category: str, title: str, body: str, link:
     )
 
 
-def _notify_domain_watchers(conn, domain: str, title: str, body: str, link: str = "") -> int:
-    rows = _fetchall(
+def _notify_all_users(conn, category: str, title: str, body: str, link: str = "") -> int:
+    total_row = _fetchone(conn, "SELECT COUNT(*) AS total FROM users")
+    total = int(total_row["total"] or 0) if total_row else 0
+    if total <= 0:
+        return 0
+    _execute(
         conn,
         """
-        SELECT user_id, domains_json
-        FROM user_interest_profiles
+        INSERT INTO notifications (user_id, category, title, body, link)
+        SELECT id, ?, ?, ?, ?
+        FROM users
         """,
+        (category, title, body, link),
     )
-    domain_l = domain.strip().lower()
-    notified = 0
-    for row in rows:
-        domains = [d.strip().lower() for d in parse_json_list(str(row["domains_json"]), [])]
-        if domain_l in domains:
-            _notify_user(conn, int(row["user_id"]), "tech_update", title, body, link)
-            notified += 1
-    return notified
+    return total
+
+
+def _notify_domain_watchers(conn, domain: str, title: str, body: str, link: str = "") -> int:
+    # Product behavior: publish/update notifications are platform-wide.
+    # `domain` is kept for call-site compatibility and future filtering.
+    _ = domain
+    return _notify_all_users(conn, "tech_update", title, body, link)
 
 
 def _safe_json_load(raw: str, fallback: Any):
@@ -3347,13 +3353,6 @@ def contributions_hub(request: Request):
                 (item["id"],),
             )
             item["reviews"] = [dict(r) for r in review_rows]
-            endorse_row = _fetchone(
-                conn,
-                "SELECT COUNT(*) AS total, COALESCE(SUM(weight), 0) AS weight FROM contribution_endorsements WHERE contribution_id = ?",
-                (item["id"],),
-            )
-            item["endorsement_count"] = int(endorse_row["total"] or 0) if endorse_row else 0
-            item["endorsement_weight"] = round(float(endorse_row["weight"] or 0), 2) if endorse_row else 0
 
         can_verify = _can_human_verify(conn, user)
     finally:
@@ -3452,14 +3451,13 @@ def contribution_create(
             ),
         )
 
-        if vis == "public":
-            _notify_domain_watchers(
-                conn,
-                domain_value,
-                f"New contribution: {title.strip()}",
-                f"A new {ctype} contribution is available for review.",
-                link="/contributions",
-            )
+        _notify_domain_watchers(
+            conn,
+            domain_value,
+            f"New contribution: {title.strip()}",
+            f"A new {ctype} contribution was published.",
+            link="/contributions",
+        )
     finally:
         conn.close()
 
@@ -3531,43 +3529,6 @@ def contribution_review(
             f"Contribution review: {item['title']}",
             f"Decision: {decision_norm}. {notes.strip() or ''}".strip(),
             link="/contributions",
-        )
-    finally:
-        conn.close()
-
-    return RedirectResponse("/contributions", status_code=303)
-
-
-@app.post("/contributions/{contribution_id}/endorse")
-def contribution_endorse(
-    request: Request,
-    contribution_id: int,
-):
-    redirect = _require_auth(request)
-    if redirect:
-        return redirect
-
-    user = _current_user(request)
-    conn = get_connection()
-    try:
-        item = _fetchone(conn, "SELECT * FROM contributions WHERE id = ?", (contribution_id,))
-        if not item:
-            return RedirectResponse("/contributions", status_code=303)
-        if int(item["user_id"]) == int(user["id"]):
-            return RedirectResponse("/contributions", status_code=303)
-        if item["final_status"] not in {"AI_VERIFIED", "VERIFIED"}:
-            return RedirectResponse("/contributions", status_code=303)
-
-        rep = _compute_user_reputation(conn, int(user["id"]))
-        weight = round(1.0 + min(1.5, float(rep["snapscore"]) / 100.0), 2)
-
-        _execute(
-            conn,
-            """
-            INSERT OR IGNORE INTO contribution_endorsements (contribution_id, user_id, weight)
-            VALUES (?, ?, ?)
-            """,
-            (contribution_id, user["id"], weight),
         )
     finally:
         conn.close()
@@ -4052,10 +4013,22 @@ def notifications_page(request: Request):
         return redirect
 
     user = _current_user(request)
+    publish_feedback = request.session.pop("publish_feedback", None)
+    update_form = request.session.get("updates_publish_draft", {})
+    if not isinstance(update_form, dict):
+        update_form = {}
+
     conn = get_connection()
     try:
         profile = _ensure_interest_profile(conn, user)
         domains = _load_domains(conn)
+        user_count_row = _fetchone(conn, "SELECT COUNT(*) AS total FROM users")
+        total_users = int(user_count_row["total"] or 0) if user_count_row else 0
+        if not update_form.get("domain"):
+            update_form["domain"] = (domains[0]["slug"] if domains else "ai")
+        if not update_form.get("severity"):
+            update_form["severity"] = "medium"
+
         rows = _fetchall(
             conn,
             """
@@ -4080,6 +4053,9 @@ def notifications_page(request: Request):
             domains=domains,
             notifications=notifications,
             unread_count=unread,
+            total_users=total_users,
+            publish_feedback=publish_feedback,
+            update_form=update_form,
         ),
     )
 
@@ -4117,28 +4093,61 @@ def publish_tech_update(
     if sev not in {"low", "medium", "high"}:
         sev = "medium"
     domain_value = domain.strip().lower() or "ai"
+    clean_title = title.strip()
+    clean_summary = summary.strip()
+    clean_source = source_url.strip()
+
+    request.session["updates_publish_draft"] = {
+        "domain": domain_value,
+        "severity": sev,
+        "title": clean_title,
+        "source_url": clean_source,
+        "summary": clean_summary,
+    }
+
+    if not clean_title or not clean_summary:
+        request.session["publish_feedback"] = {
+            "level": "error",
+            "message": "Title and summary are required. Your typed values were kept.",
+        }
+        return RedirectResponse("/notifications", status_code=303)
 
     conn = get_connection()
     try:
-        if user["role"] != "professor" and not _can_human_verify(conn, user):
-            return RedirectResponse("/notifications", status_code=303)
-
         _execute(
             conn,
             """
             INSERT INTO tech_updates (domain, title, summary, source_url, severity, created_by)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (domain_value, title.strip(), summary.strip(), source_url.strip(), sev, user["id"]),
+            (domain_value, clean_title, clean_summary, clean_source, sev, user["id"]),
         )
 
-        _notify_domain_watchers(
+        delivered_count = _notify_domain_watchers(
             conn,
             domain_value,
-            f"Tech update: {title.strip()}",
-            summary.strip(),
+            f"Tech update: {clean_title}",
+            clean_summary,
             link="/explore",
         )
+        _notify_user(
+            conn,
+            int(user["id"]),
+            "system",
+            "Update published successfully",
+            f"Your tech update was delivered to {delivered_count} inboxes.",
+            link="/notifications",
+        )
+        request.session.pop("updates_publish_draft", None)
+        request.session["publish_feedback"] = {
+            "level": "success",
+            "message": f"Submitted. Broadcast sent to {delivered_count} users.",
+        }
+    except Exception as exc:
+        request.session["publish_feedback"] = {
+            "level": "error",
+            "message": f"Publish failed. Your typed values were kept. Error: {str(exc)[:140]}",
+        }
     finally:
         conn.close()
 
