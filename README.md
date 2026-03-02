@@ -176,6 +176,3 @@ reputation.
 - The demo is built around **one course and one student journey**; focus on
   completeness rather than breadth.
 
-
-Good luck in Deep Learning Week 2026—aim to show judges a system that not
-only works, but feels like the future of adaptive, trustworthy learning! 🌟
