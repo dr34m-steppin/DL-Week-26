@@ -1,11 +1,9 @@
 # DL-Week-26
-## Team: exe.stoppedworking
+## Team Name: exe.stoppedworking
 
 # ReLearnAI – Adaptive Learning & Verified Contribution Platform 🧩
 
-*Project entry for Deep Learning Week 2026 – a system that does much more
-than quizzes. It models learning, recommends next steps, and preserves trust
-through human oversight and reputation.*
+*A system that does much more than quizzes. It models learning, recommends next steps, and preserves trust through human oversight and reputation.*
 
 ---
 
