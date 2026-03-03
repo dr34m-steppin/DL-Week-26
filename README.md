@@ -186,8 +186,8 @@ cat testbench/SETUP_AND_RUN.md
 
 ## 📚 Documentation
 
-- **[RelearnAI Documentation.pdf](docs/RelearnAI Documentation.pdf)** – Full problem & solution narrative
-- **[FINAL_PROPOSAL.md](docs/FINAL_PROPOSAL.md)** – Full problem & solution narrative
+- **[RelearnAI Documentation.pdf]** – Full Documentation (read in docs folder)
+- **[FINAL_PROPOSAL.md](docs/FINAL_PROPOSAL.md)** – Final stage of the problem & solution narrative
 - **[JUDGING_ALIGNMENT.md](docs/JUDGING_ALIGNMENT.md)** – How we meet judging criteria
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** – Technical deep dive & design decisions
 - **[STEP_BY_STEP_BEGINNER.md](docs/STEP_BY_STEP_BEGINNER.md)** – First-time user guide
