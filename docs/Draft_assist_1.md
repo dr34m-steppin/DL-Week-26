@@ -1,4 +1,4 @@
-# ReLearnAI Project Documentation
+# ReLearnAI Assisted Draft
 
 ## 1. Executive Summary
 ReLearnAI is a global collaborative learning platform that unifies:
